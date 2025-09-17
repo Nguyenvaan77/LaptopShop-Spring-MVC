@@ -70,7 +70,6 @@ public class UserController {
         User user1 = userService.getUserById(user.getId());
         if(user1 != null) {
             user1.setFullName(user.getFullName());
-            user1.setPhoneNumber(user.getPhoneNumber());
             user1.setAddress(user.getAddress());
             userService.saveUser(user1);
         }

@@ -1,5 +1,6 @@
 package com.basis.anhangda37.domain;
 
+import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,24 +13,33 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String email;
     private String password;
     private String fullName;
     private String address;
-    private String phoneNumber;
+    private String phone;
+    private String avatar;
+    private Long roleId;
 
-    public User(String email, String password, String fullName, String address, String phoneNumber) {
+    public User() {}
+
+    public User(Long id, String email, String password, String fullName, String address, String phone, String avatar,
+            Long roleId) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.fullName = fullName;
         this.address = address;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
+        this.avatar = avatar;
+        this.roleId = roleId;
     }
-
-    public User() {
+    public Long getId() {
+        return id;
     }
-    
+    public void setId(Long id) {
+        this.id = id;
+    }
     public String getEmail() {
         return email;
     }
@@ -54,23 +64,23 @@ public class User {
     public void setAddress(String address) {
         this.address = address;
     }
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone() {
+        return phone;
     }
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
-    public Long getId() {
-        return id;
+    public String getAvatar() {
+        return avatar;
     }
-    public void setId(Long id) {
-        this.id = id;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
-
-    @Override
-    public String toString() {
-        return "User [email=" + email + ", password=" + password + ", fullName=" + fullName + ", address=" + address
-                + ", phoneNumber=" + phoneNumber + "]";
+    public Long getRoleId() {
+        return roleId;
+    }
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
     }
 
     
