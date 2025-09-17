@@ -2,8 +2,10 @@ package com.basis.anhangda37.controller;
 
 import java.util.List;
 
+import org.apache.catalina.realm.UserDatabaseRealm;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,6 +74,21 @@ public class UserController {
             user1.setAddress(user.getAddress());
             userService.saveUser(user1);
         }
+        return "redirect:/admin/user";
+    }
+
+    @GetMapping(value = "/admin/user/delete/{id}")
+    public String getDeletePage(Model model, @PathVariable Long id) {
+        model.addAttribute("id", id);
+        User user = new User();
+        user.setId(id);
+        model.addAttribute("user", user);
+        return "admin/user/delete";
+    }
+    
+    @PostMapping(value = "/admin/user/delete")
+    public String deleteUser(Model model, @ModelAttribute("user") User user) {
+        userService.deleteUser(user.getId());
         return "redirect:/admin/user";
     }
 }
