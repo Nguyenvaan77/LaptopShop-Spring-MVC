@@ -25,17 +25,6 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        User nullUser = new User();
-            nullUser.setId(-1L);
-            nullUser.setFullName("N/A");
-            nullUser.setEmail("N/A");
-            nullUser.setAddress("N/A");
-            nullUser.setPhoneNumber("N/A");
-            nullUser.setPassword("N/A");
-            if (id == null) {
-                
-                return nullUser;
-            }
-        return userRepository.findById(id).orElse(nullUser);
+        return userRepository.findById(id).orElse(null);
     }
 }

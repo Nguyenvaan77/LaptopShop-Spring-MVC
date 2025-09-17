@@ -56,4 +56,22 @@ public class UserController {
         return "redirect:/admin/user";
     }
     
+    @GetMapping(value = "/admin/user/update/{id}")
+    public String getUpdatePage(Model model, @PathVariable Long id) {
+        User user = userService.getUserById(id);
+        model.addAttribute("newUser", user);
+        return "admin/user/update";
+    }
+
+    @PostMapping(value = "/admin/user/update")
+    public String postUpdateUser(Model model, @ModelAttribute("newUser") User user) {
+        User user1 = userService.getUserById(user.getId());
+        if(user1 != null) {
+            user1.setFullName(user.getFullName());
+            user1.setPhoneNumber(user.getPhoneNumber());
+            user1.setAddress(user.getAddress());
+            userService.saveUser(user1);
+        }
+        return "redirect:/admin/user";
+    }
 }
