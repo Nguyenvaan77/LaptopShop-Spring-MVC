@@ -1,10 +1,15 @@
 package com.basis.anhangda37.domain;
 
+import java.util.List;
+
 import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -13,15 +18,21 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
     private Double totalPrice;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToMany(mappedBy = "order")
+    private List<OrderDetail> orderDetails;
 
     public Order() {
     }
     
-    public Order(Long id, Long userId, Double totalPrice) {
+    public Order(Long id, User user, Double totalPrice) {
         this.id = id;
-        this.userId = userId;
+        this.user = user;
         this.totalPrice = totalPrice;
     }
     
@@ -31,12 +42,6 @@ public class Order {
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
     public Double getTotalPrice() {
         return totalPrice;
     }
@@ -44,6 +49,11 @@ public class Order {
         this.totalPrice = totalPrice;
     }
 
-    
+    public User getUser() {
+        return user;
+    }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

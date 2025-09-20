@@ -1,10 +1,17 @@
 package com.basis.anhangda37.domain;
 
+import java.util.List;
+
+import org.hibernate.annotations.ManyToAny;
+
 import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -19,12 +26,18 @@ public class User {
     private String address;
     private String phone;
     private String avatar;
-    private Long roleId;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 
     public User() {}
 
     public User(Long id, String email, String password, String fullName, String address, String phone, String avatar,
-            Long roleId) {
+            Role role, List<Order> orders) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -32,8 +45,10 @@ public class User {
         this.address = address;
         this.phone = phone;
         this.avatar = avatar;
-        this.roleId = roleId;
+        this.role = role;
+        this.orders = orders;
     }
+    
     public Long getId() {
         return id;
     }
@@ -76,12 +91,25 @@ public class User {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
-    public Long getRoleId() {
-        return roleId;
+
+    public Role getRole() {
+        return role;
     }
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+
+    public void setRole(Role role) {
+        this.role = role;
     }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
+    
+    
 
     
 }

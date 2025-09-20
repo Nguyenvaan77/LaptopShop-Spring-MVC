@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,41 +26,13 @@
                             <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                             <li class="breadcrumb-item active">Product</li>    
                         </ol>
-                        
-                        <div>
-    <h3>Delete User with id = ${userId}</h3>
-
-    <hr/>
-
-    <div >
-        <form:form action="/admin/user/delete" modelAttribute="user" method="post">
-            <div class="alert alert-warning" role="alert">
-                Are you sure to delete user with id = ${id}?
-            </div>
-
-            <div style="display: none">
-                <form:input type="number" path="id" class="form-control"/>
-            </div>
-            
-
-            <button class="btn btn-danger" type="submit">
-                Confirm
-            </button>
-        </form:form>
-    </div>
-                        </div>
+                        <div>Product</div>
                     </div>
                 </main>
                 <jsp:include page="../layout/footer.jsp" />
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="/js/scripts.js"></script>
+        <script src="js/scripts.js"></script>
     </body>
 </html>
-
-
-
-
-    
-

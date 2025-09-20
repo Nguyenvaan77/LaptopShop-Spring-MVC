@@ -1,4 +1,4 @@
-package com.basis.anhangda37.controller;
+package com.basis.anhangda37.controller.admin;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class UserController {
     public String routeUserTable(Model model) {
         List<User> users = userService.getAllUsers();
         model.addAttribute("users", users);
-        return "admin/user/userTable";
+        return "admin/user/show";
     }
 
     @GetMapping("/admin/user/{id}")
@@ -42,7 +42,7 @@ public class UserController {
         User user = userService.getUserById(id);
         model.addAttribute("user", user);
         model.addAttribute("id", id);
-        return "admin/user/show";
+        return "admin/user/detail";
     }
     
 

@@ -1,10 +1,13 @@
 package com.basis.anhangda37.domain;
 
+import java.util.List;
+
 import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,14 +18,18 @@ public class Role {
     private Long id;
     private String name;
     private String description;
+
+    @OneToMany(mappedBy = "role")
+    private List<User> users;
     
     public Role() {
     }
 
-    public Role(Long id, String name, String description) {
+    public Role(Long id, String name, String description, List<User> users) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.users = users;
     }
     
     public Long getId() {
@@ -44,5 +51,11 @@ public class Role {
         this.description = description;
     }
 
+    public List<User> getUsers() {
+        return users;
+    }
 
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
 }
