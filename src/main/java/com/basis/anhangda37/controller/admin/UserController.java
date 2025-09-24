@@ -15,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -30,6 +32,7 @@ import com.basis.anhangda37.service.UserService;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 
 import jakarta.servlet.ServletContext;
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,7 +54,7 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-    @RequestMapping(value = "/admin/user", method = RequestMethod.GET)
+    @GetMapping(value = "/admin/user")
     public String routeUserTable(Model model) {
         List<User> users = userService.getAllUsers();
         model.addAttribute("users", users);
@@ -74,8 +77,13 @@ public class UserController {
 
     @PostMapping(value = "/admin/user/create")
     public String routeUserTablePost(Model model,
-            @ModelAttribute("newUser") User user,
+            @ModelAttribute("newUser") @Valid User user,
+            BindingResult result,
             @RequestParam("hoidanitFile") MultipartFile file) {
+        List<FieldError> errors = result.getFieldErrors();
+        errors.forEach(e -> {
+            System.out.println(e.getObjectName() + " " + e.getDefaultMessage());
+        });
         String avatarString = uploadService.handleSaveUploadFile(file, "avatar");
         user.setAvatar((avatarString == null || avatarString.isBlank()) ? null : avatarString);
         String hashPassword = this.passwordEncoder.encode(user.getPassword());

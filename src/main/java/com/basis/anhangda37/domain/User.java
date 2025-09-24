@@ -2,9 +2,6 @@ package com.basis.anhangda37.domain;
 
 import java.util.List;
 
-import org.hibernate.annotations.ManyToAny;
-
-import jakarta.annotation.Generated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,6 +10,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "users")
@@ -20,8 +20,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
     private String email;
+
+    @NotNull
+    @Size(min = 2)
     private String password;
+
+    @NotNull
     private String fullName;
     private String address;
     private String phone;

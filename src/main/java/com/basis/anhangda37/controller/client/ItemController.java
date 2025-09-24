@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ItemController {
-    @GetMapping("/product/shop-detail")
+    @GetMapping("/product/detail")
     public String getProductDetail() {
-        return "client/product/shop-detail";
+        return "client/product/detail";
     }
 }

@@ -26,7 +26,56 @@
                             <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                             <li class="breadcrumb-item active">Product</li>    
                         </ol>
-                        <div>Product</div>
+                        <div class="mt-5">
+                            <div class="col-12 mx-auto">
+                                <div class="d-flex justify-content-between">
+                                    <h3>
+                                        Table Products
+                                    </h3>
+                                    <div class="btn btn-primary">
+                                        <a href="/admin/product/create">Add new product</a>
+                                    </div>
+                                </div>
+
+                                <hr/>
+                                <table class="table table-bordered">
+                                    <thead class="table-active">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Factory</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Target</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <c:forEach var ="eachProduct" items = "${products}">
+                                            <tr>
+                                                <th scope="row">${eachProduct.id}</th>
+                                                <td>${eachProduct.name}</td>
+                                                <td>${eachProduct.factory}</td>
+                                                <td>${eachProduct.price}</td>
+                                                <td>${eachProduct.quantity}</td>
+                                                <td>${eachProduct.target}</td>
+                                                <td>${eachProduct.shortDesc}</td>
+                                                <td>
+                                                    <div class="button">
+                                                    <a href="/admin/product/${eachProduct.id}" class = "btn btn-primary">View</a>
+                                                    <a href="/admin/product/update/${eachProduct.id}" class = "btn btn-warning">Update</a>
+                                                    <a href="/admin/product/delete/${eachProduct.id}" class = "btn btn-danger">Delete</a>
+                                                </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </main>
                 <jsp:include page="../layout/footer.jsp" />

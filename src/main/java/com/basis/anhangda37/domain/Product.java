@@ -21,7 +21,7 @@ public class Product {
     private String detailDesc;
     private String shortDesc;
     private Long quantity;
-    private Long sold;
+    private Long sold = 0L;
     private String factory;
     private String target;
 

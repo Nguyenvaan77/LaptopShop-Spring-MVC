@@ -8,8 +8,8 @@
                                 <i class="fas fa-car-side fa-3x text-white"></i>
                             </div>
                             <div class="featurs-content text-center">
-                                <h5>Free Shipping</h5>
-                                <p class="mb-0">Free on order over $300</p>
+                                <h5>Free Delivery</h5>
+                                <p class="mb-0">Apply for bill over 300$</p>
                             </div>
                         </div>
                     </div>
@@ -20,7 +20,7 @@
                             </div>
                             <div class="featurs-content text-center">
                                 <h5>Security Payment</h5>
-                                <p class="mb-0">100% security payment</p>
+                                <p class="mb-0">100% Security Payment</p>
                             </div>
                         </div>
                     </div>
@@ -30,8 +30,8 @@
                                 <i class="fas fa-exchange-alt fa-3x text-white"></i>
                             </div>
                             <div class="featurs-content text-center">
-                                <h5>30 Day Return</h5>
-                                <p class="mb-0">30 day money guarantee</p>
+                                <h5>Free return</h5>
+                                <p class="mb-0">30 returning days</p>
                             </div>
                         </div>
                     </div>
@@ -42,7 +42,7 @@
                             </div>
                             <div class="featurs-content text-center">
                                 <h5>24/7 Support</h5>
-                                <p class="mb-0">Support every time fast</p>
+                                <p class="mb-0">Everywhere - everytime</p>
                             </div>
                         </div>
                     </div>

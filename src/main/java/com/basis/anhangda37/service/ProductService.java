@@ -1,5 +1,7 @@
 package com.basis.anhangda37.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.basis.anhangda37.domain.Product;
@@ -13,7 +15,21 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    Product getProductById(Long id) {
+    public Product getProductById(Long id) {
         return productRepository.findById(id).orElse(null);
+    }
+
+    public List<Product> getAllProduct() {
+        return productRepository.findAll();
+    }
+
+    public void deleteProductById(Long id) {
+        if(productRepository.existsById(id)) {
+            productRepository.deleteById(id);
+        }
+    }
+
+    public Product saveProduct(Product product) {
+        return productRepository.save(product);
     }
 }

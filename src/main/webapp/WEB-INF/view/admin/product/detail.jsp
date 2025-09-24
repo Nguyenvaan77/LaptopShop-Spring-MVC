@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,19 +21,19 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Manage Users</h1>
+                        <h1 class="mt-4">Manage Poduct</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
-                            <li class="breadcrumb-item active">User</li>    
+                            <li class="breadcrumb-item active">Product</li>    
                         </ol>
                         <div class="mt-5">
                             <div class="col-12 mx-auto">
                                 <div class="d-flex justify-content-between">
                                     <h3>
-                                        Table users
+                                        Table Products
                                     </h3>
                                     <div class="btn btn-primary">
-                                        <a href="/admin/user/create">Create a user</a>
+                                        <a href="/admin/product/create">Add new product</a>
                                     </div>
                                 </div>
 
@@ -43,25 +42,31 @@
                                     <thead class="table-active">
                                         <tr>
                                             <th scope="col">ID</th>
-                                            <th scope="col">Email</th>
-                                            <th scope="col">FullName</th>
-                                            <th scope="col">Role</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Factory</th>
+                                            <th scope="col">Price</th>
+                                            <th scope="col">Quantity</th>
+                                            <th scope="col">Target</th>
+                                            <th scope="col">Description</th>
                                             <th scope="col">Action</th>
                                         </tr>
                                     </thead>
 
                                     <tbody>
-                                        <c:forEach var ="user" items = "${users}">
+                                        <c:forEach var ="eachLaptop" items = "${laptops}">
                                             <tr>
-                                                <th scope="row">${user.id}</th>
-                                                <td>${user.email}</td>
-                                                <td>${user.fullName}</td>
-                                                <td>${user.role.name}</td>
+                                                <th scope="row">${eachLaptop.id}</th>
+                                                <td>${eachLaptop.name}</td>
+                                                <td>${eachLaptop.factory}</td>
+                                                <td>${eachLaptop.price}</td>
+                                                <td>${eachLaptop.quantity}</td>
+                                                <td>${eachLaptop.target}</td>
+                                                <td>${eachLaptop.shortDesc}</td>
                                                 <td>
                                                     <div class="button">
-                                                    <a href="/admin/user/${user.id}" class = "btn btn-primary">View</a>
-                                                    <a href="/admin/user/update/${user.id}" class = "btn btn-warning">Update</a>
-                                                    <a href="/admin/user/delete/${user.id}" class = "btn btn-danger">Delete</a>
+                                                    <a href="/admin/product/${eachLaptop.id}" class = "btn btn-primary">View</a>
+                                                    <a href="/admin/product/update/${eachLaptop.id}" class = "btn btn-warning">Update</a>
+                                                    <a href="/admin/product/delete/${eachLaptop.id}" class = "btn btn-danger">Delete</a>
                                                 </div>
                                                 </td>
                                             </tr>
@@ -77,8 +82,6 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="/js/scripts.js"></script>
+        <script src="js/scripts.js"></script>
     </body>
 </html>
-
-
