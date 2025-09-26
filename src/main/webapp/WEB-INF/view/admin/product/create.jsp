@@ -47,21 +47,29 @@
 
                             <form:form action="/admin/product/create" method="post" enctype="multipart/form-data" modelAttribute="newProduct">
                             
-                            <div class="row gx-3">  
+                            <div class="row gx-3">
                                 <!-- Name -->
+                                <c:set var = "errorName">
+                                    <form:errors path="name" cssClass = "invalid-feedback"/>
+                                </c:set>
                                 <div class="col-md-6">
                                     <label for="nameInput" class="form-label">Name</label>
                                     <form:input type="text" 
-                                                id="nameInput" class="form-control" 
+                                                id="nameInput" class="form-control ${not empty errorName ? 'is-invalid' : ''}" 
                                                 path="name"/>
+                                    ${errorName}
                                 </div>
 
                                 <!-- Price -->
                                 <div class="col-md-6">
+                                    <c:set var = "errorPrice">
+                                        <form:errors path="price" cssClass = "invalid-feedback"/>
+                                    </c:set>
                                     <label for="inputPrice" class="form-label">Price</label>
                                     <form:input type="number" id="inputPrice" 
-                                                class="form-control"
+                                                class="form-control ${not empty errorPrice ? 'is-invalid' : ''}"
                                                 path="price"/>    
+                                    ${errorPrice}
                                 </div>
                             </div>
 
@@ -81,8 +89,11 @@
                                 </div>
 
                                 <div class="col-md-6">
+                                    <c:set var = "errorQuantity">
+                                        <form:errors path="quantity" cssClass = "invalid-feedback"/>
+                                    </c:set>
                                     <label for="inputQuantity" class="form-label">Quantity</label>
-                                    <form:input type="number" name="" id="inputQuantity" class="form-control"
+                                    <form:input type="number" name="" id="inputQuantity" class="form-control ${not empty errorQuantity ? 'is-invalid' : ''}"
                                     path="quantity"/>
                                 </div>
                             </div>
@@ -99,7 +110,7 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="selectTarget" class="form-label">Factory</label>
+                                    <label for="selectTarget" class="form-label">Target</label>
                                     <form:select class="form-select" id="selectTarget" path = "target">
                                         <form:option value="Gaming">Gaming</form:option>
                                         <form:option value="Office">Office</form:option>

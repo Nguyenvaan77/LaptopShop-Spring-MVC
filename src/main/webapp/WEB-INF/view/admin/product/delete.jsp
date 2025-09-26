@@ -22,21 +22,21 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Manage Poduct</h1>
+                        <h1 class="mt-4">Manage Product</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                             <li class="breadcrumb-item active">Product</li>    
                         </ol>
                         
                         <div>
-    <h3>Delete User with id = ${userId}</h3>
+    <h3>Delete Product with id = ${productId}</h3>
 
     <hr/>
 
     <div >
-        <form:form action="/admin/user/delete" modelAttribute="user" method="post">
+        <form:form action="/admin/product/delete" modelAttribute="product" method="post">
             <div class="alert alert-warning" role="alert">
-                Are you sure to delete user with id = ${id}?
+                Are you sure to delete product with id = ${id}?
             </div>
 
             <div style="display: none">

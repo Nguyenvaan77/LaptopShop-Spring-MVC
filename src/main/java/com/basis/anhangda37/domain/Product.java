@@ -2,12 +2,18 @@ package com.basis.anhangda37.domain;
 
 import java.util.List;
 
+import org.springframework.format.annotation.NumberFormat;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "products")
@@ -15,11 +21,27 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
+    @NotBlank
     private String name;
+
+    @NotNull
+    @NumberFormat
+    @Min(0)
     private Double price;
+
     private String image;
+
+    @NotNull
+    @NotBlank
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String detailDesc;
     private String shortDesc;
+
+    @NotNull
+    @NumberFormat
+    @Min(1)
     private Long quantity;
     private Long sold = 0L;
     private String factory;

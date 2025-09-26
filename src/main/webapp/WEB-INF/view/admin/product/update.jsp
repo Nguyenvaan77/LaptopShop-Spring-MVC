@@ -19,6 +19,8 @@
     <script>
         $(document).ready(() => { 
             const avatarFile = $("#avatarFile");
+            const defaultImagePath = "/images/common/product/default-image.png";
+            
             avatarFile.change(function (e) {
                 const imgURL = URL.createObjectURL(e.target.files[0]);
                 $("#avatarPreview").removeAttr("src");
@@ -34,7 +36,7 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Manage Poduct</h1>
+                    <h1 class="mt-4">Manage Product</h1>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                         <li class="breadcrumb-item active">Product</li>    
@@ -42,64 +44,102 @@
                     
                     <div class="container">
                         <div class="col-md-6 col-12 mx-auto">
-                            <legend>Update user</legend>
+                            <legend>Update product</legend>
 
-                            <form:form action="/admin/user/update" method="post" modelAttribute="newUser" enctype="multipart/form-data">
+                            <form:form action="/admin/product/update" method="post" modelAttribute="newProduct" enctype="multipart/form-data">
                                 <div style="display: none">
                                     <div class="col-md-6"> 
                                         <label for="idInput" class="form-label">Id</label>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <form:input placeholder="Your id" type="text" id="idInput" class="form-control" 
-                                        path="id" />
+                                        <form:input placeholder="Your id" type="number" id="idInput" class="form-control" 
+                                        path="id"/>
+                                    </div>
+                                </div>
+
+
+                                <div class="row gx-3">
+                                    <div class="col-md-6">
+                                        <c:set var = "errorName">
+                                            <form:errors path="name" cssClass = "invalid-feedback"/>
+                                        </c:set>
+                                        <label for="inputName" class="form-label">Name</label>
+                                        <form:input type="text" id="inputName" class="form-control ${not empty errorName ? 'is-invalid' : ''}" 
+                                        path="name"/>
+                                        ${errorName}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <c:set var = "errorPrice">
+                                            <form:errors path="price" cssClass = "invalid-feedback"/>
+                                        </c:set>
+                                        <label for="inputPrice" class="form-label">Price</label>
+                                        <form:input type="number" id="inputPrice" class="form-control ${not empty errorPrice ? 'is-invalid' : ''}"
+                                        path="price" />
+                                        ${errorPrice}
+                                    </div>
+                                </div>
+
+                                <div class="row gx-3">
+                                    <div class="md-6">
+                                        <c:set var = "errorDetailDesc">
+                                            <form:errors path = "detailDesc" cssClass = "invalid-feedback"/>
+                                        </c:set>
+                                        <label for="inputDetailDesc" class="form-label">Description</label>
+                                        <form:input type="text" id="inputDetailDesc" class="form-control ${not empty errorDetailDesc ? 'is-invalid' : ''}"
+                                        path="detailDesc"/>
+                                        ${errorDetailDesc}
                                     </div>
                                 </div>
 
                                 <div class="row gx-3">
                                     <div class="col-md-6">
-                                        <label for="emailInput" class="form-label">Email</label>
-                                        <form:input placeholder="Confirm your email" type="text" id="emailInput" class="form-control" 
-                                        path="email" disabled="true"/>
+                                        <label for="inputShortDesc" class="form-label">Summary</label>
+                                        <form:input type="text" id="inputShortDesc" class="form-control "
+                                        path="shortDesc"/>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="inputName" class="form-label">Fullname</label>
-                                        <form:input type="text" id="inputName" class="form-control"
-                                        path="fullName" />
-                                    </div>
-                                </div>
-
-                                <div class="row gx-3">
-                                    <div class="col-md-6">
-                                        <label for="inputAddress" class="form-label">Address</label>
-                                        <form:input type="text" id="inputAddress" class="form-control"
-                                        path="address"/>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="inputPhoneNumber" class="form-label">Phone number</label>
-                                        <form:input type="number" id="inputPhoneNumber" class="form-control"
-                                        path="phone"/>
-                                    </div>
-                                </div>
-
-                                <div class="row gx-3">
-                                    <div class="col-md-6">
-                                        <label for="selectRole" class="form-label">Role:</label>
-                                        <form:select class="form-select" id="selectRole" path = "role.name">
-                                            <form:option value="USER">USER</form:option>
-                                            <form:option value="ADMIN">ADMIN</form:option>
+                                        <label for="selectTarget" class="form-label">Target</label>
+                                        <form:select class="form-select" id="selectTarget" path = "target">
+                                            <form:option value="Gaming">Gaming</form:option>
+                                            <form:option value="Office">Office</form:option>
+                                            <form:option value="Personal">Personal</form:option>
+                                            <form:option value="Organization">Organization</form:option>
                                         </form:select>
                                     </div>
+                                </div>
 
+                                <div class="row gx-3">
                                     <div class="col-md-6">
-                                        <label for="avatarFile" class="form-label">Upload file</label>
-                                        <input name="hoidanitFile" type="file" id="avatarFile" class="form-control" accept = ".png, .jpg, .jpeg"
-                                        />
+                                        <c:set var = "errorQuantity">
+                                            <form:errors path="quantity" cssClass = "invalid-feedback"/>
+                                        </c:set>
+                                        <label for="inputQuantity" class="form-label">Quantity</label>
+                                        <form:input type="number" id="inputQuantity" class="form-control ${not empty errorQuantity ? 'is-invalid' : ''}"
+                                        path="quantity"/>
+                                        ${errorQuantity}
                                     </div>
                                     <div class="col-md-6">
-                                        <img style="max-height: 250px; display: block;" alt="avatar preview" id="avatarPreview" src="${newUser.avatar}">
+                                        <label for="selectFactory" class="form-label">Factory</label>
+                                        <form:select class="form-select" id="selectFactory" path = "factory">
+                                            <form:option value="USER">APPLE</form:option>
+                                            <form:option value="ASUS">ASUS</form:option>
+                                            <form:option value="LENOVO">LENOVO</form:option>
+                                            <form:option value="SAMSUNG">SAMSUNG</form:option>
+                                        </form:select>
+                                    </div>
+                                </div>
+
+                                <div class="row gx-3">
+                                    <div class="md-6">
+                                        <label for="avatarFile" class="form-label">Upload file</label>
+                                        <input name="avatarProduct" type="file" id="avatarFile" class="form-control" accept = ".png, .jpg, .jpeg"
+                                        />
+                                    </div>
+                                    <div class="md-6">
+                                        <img style="max-height: 250px; display: block" alt="avatar preview" id="avatarPreview" src="${newProduct.image}">
                                     </div>
                                     
                                 </div>

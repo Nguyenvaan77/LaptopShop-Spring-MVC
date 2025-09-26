@@ -23,7 +23,7 @@ public class UploadService {
         if(file == null || file.isEmpty() || file.getName().equals("")) {
             return "";
         }
-        String finalSavedPath = "/images/";
+        String finalSavedPath = "";
         try {
             byte[] bytes;
             bytes = file.getBytes();
@@ -33,10 +33,9 @@ public class UploadService {
                 dir.mkdirs();
             }
 
-            finalSavedPath += targetFolder + "/" + System.currentTimeMillis() + "-" + file.getOriginalFilename();
+            finalSavedPath += "/" + System.currentTimeMillis() + "-" + file.getOriginalFilename();
 
-            File serverFile = new File(dir.getAbsolutePath() + File.separator + System.currentTimeMillis() + "-"
-                    + file.getOriginalFilename());
+            File serverFile = new File(dir.getAbsolutePath() + finalSavedPath);
 
             BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
             stream.write(bytes);
@@ -44,6 +43,7 @@ public class UploadService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        finalSavedPath = "/images/" + targetFolder + finalSavedPath;
         return finalSavedPath;
     }
 

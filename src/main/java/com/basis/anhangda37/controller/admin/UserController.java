@@ -78,12 +78,15 @@ public class UserController {
     @PostMapping(value = "/admin/user/create")
     public String routeUserTablePost(Model model,
             @ModelAttribute("newUser") @Valid User user,
-            BindingResult result,
+            BindingResult newUserBindingResult,
             @RequestParam("hoidanitFile") MultipartFile file) {
-        List<FieldError> errors = result.getFieldErrors();
+        List<FieldError> errors = newUserBindingResult.getFieldErrors();
         errors.forEach(e -> {
-            System.out.println(e.getObjectName() + " " + e.getDefaultMessage());
+            System.out.println(e.getField() + " " + e.getDefaultMessage());
         });
+        if(newUserBindingResult.hasErrors()) {
+            return "admin/user/create";
+        }
         String avatarString = uploadService.handleSaveUploadFile(file, "avatar");
         user.setAvatar((avatarString == null || avatarString.isBlank()) ? null : avatarString);
         String hashPassword = this.passwordEncoder.encode(user.getPassword());

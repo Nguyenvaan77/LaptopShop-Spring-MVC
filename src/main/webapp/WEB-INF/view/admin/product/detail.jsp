@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+        <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +13,7 @@
         <title>Dashboard - SB Admin</title>
         
         <link href="/css/styles.css" rel="stylesheet" />
+
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
     <body class="sb-nav-fixed">
@@ -21,67 +23,58 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Manage Poduct</h1>
+                        <h1 class="mt-4">Manage Product</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                             <li class="breadcrumb-item active">Product</li>    
                         </ol>
-                        <div class="mt-5">
-                            <div class="col-12 mx-auto">
-                                <div class="d-flex justify-content-between">
-                                    <h3>
-                                        Table Products
-                                    </h3>
-                                    <div class="btn btn-primary">
-                                        <a href="/admin/product/create">Add new product</a>
-                                    </div>
-                                </div>
+                        <div class="container">
+        <div class="col-12 mx-auto">
+            <div class="d-flex justify-content-between">
+                <h3>
+                    Information product id = ${id}
+                </h3>
+            </div>
+ 
+            <hr/>
 
-                                <hr/>
-                                <table class="table table-bordered">
-                                    <thead class="table-active">
-                                        <tr>
-                                            <th scope="col">ID</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Factory</th>
-                                            <th scope="col">Price</th>
-                                            <th scope="col">Quantity</th>
-                                            <th scope="col">Target</th>
-                                            <th scope="col">Description</th>
-                                            <th scope="col">Action</th>
-                                        </tr>
-                                    </thead>
+            <div modelAttribute="product">
+                <div class="col">
+                        <img style="max-height: 150px;" src="${product.image}" alt="avatar preview" id="avatarPreview">
+                </div>
+                <div class="card" 60% >
+                    <div class="card-header">
+                        Product information
+                    </div>
 
-                                    <tbody>
-                                        <c:forEach var ="eachLaptop" items = "${laptops}">
-                                            <tr>
-                                                <th scope="row">${eachLaptop.id}</th>
-                                                <td>${eachLaptop.name}</td>
-                                                <td>${eachLaptop.factory}</td>
-                                                <td>${eachLaptop.price}</td>
-                                                <td>${eachLaptop.quantity}</td>
-                                                <td>${eachLaptop.target}</td>
-                                                <td>${eachLaptop.shortDesc}</td>
-                                                <td>
-                                                    <div class="button">
-                                                    <a href="/admin/product/${eachLaptop.id}" class = "btn btn-primary">View</a>
-                                                    <a href="/admin/product/update/${eachLaptop.id}" class = "btn btn-warning">Update</a>
-                                                    <a href="/admin/product/delete/${eachLaptop.id}" class = "btn btn-danger">Delete</a>
-                                                </div>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="row">
+                        <div class="col">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Name: ${product.name}</li>
+                                <li class="list-group-item">Price: ${product.price}</li>
+                                <li class="list-group-item">Description: ${product.detailDesc}</li>
+                                <li class="list-group-item">Factory: ${product.factory}</li>
+                                <li class="list-group-item">Target: ${product.target}</li>
+                                <li class="list-group-item">Quantity: ${product.quantity}</li>
+                                <li class="list-group-item">Sold: ${product.sold}</li>
+                            </ul>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <a href="/admin/product" class="btn btn-success">Back</a>
+        </div>
+</div>
                     </div>
                 </main>
                 <jsp:include page="../layout/footer.jsp" />
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="js/scripts.js"></script>
+        <script src="/js/scripts.js"></script>
     </body>
 </html>
+
+
+
+
