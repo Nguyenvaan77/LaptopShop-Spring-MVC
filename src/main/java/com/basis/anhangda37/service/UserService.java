@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.basis.anhangda37.domain.Role;
 import com.basis.anhangda37.domain.User;
+import com.basis.anhangda37.domain.domain.RegisterDto;
 import com.basis.anhangda37.repository.RoleRepository;
 import com.basis.anhangda37.repository.UserRepository;
 
@@ -20,9 +21,6 @@ public class UserService {
     }
 
     public User saveUser(User user) {
-        Role role = null;
-        role = roleRepository.findByName(user.getRole().getName()).orElse(null);
-        user.setRole(role);
         User savedUSer = userRepository.save(user);
         return savedUSer;
     }
@@ -37,5 +35,16 @@ public class UserService {
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public User registerDtoToUser(RegisterDto dto) {
+        User user = new User();
+        user.setEmail(dto.getEmail());
+        user.setFullName(dto.getFirstName() + " " + dto.getLastName());
+        return user;
+    } 
+
+    public Role getRoleByName(String roleName) {
+        return roleRepository.findByName(roleName).get();
     }
 }

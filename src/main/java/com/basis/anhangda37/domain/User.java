@@ -22,17 +22,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Email(message = "Email is not valid",
-    regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     private String email;
-
-    @NotNull
-    @Size(min = 2)
     private String password;
-
-    @NotNull
-    @NotBlank(message = "Tên người dùng không thể trống")
     private String fullName;
     private String address;
     private String phone;
