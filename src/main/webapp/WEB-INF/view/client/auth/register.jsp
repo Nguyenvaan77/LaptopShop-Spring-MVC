@@ -33,11 +33,24 @@
                                                 <c:set var = "errorConfirmPassword">
                                                     <form:errors path = "confirmPassword" cssClass="invalid-feedback"/>
                                                 </c:set>
+
+                                                <c:set var = "errorFirstName">
+                                                    <form:errors path = "firstName" cssClass="invalid-feedback"/>
+                                                </c:set>
+
+                                                <c:set var = "errorPassword">
+                                                    <form:errors path = "password" cssClass="invalid-feedback"/>
+                                                </c:set>
+
                                                 <div class="col-md-6">
                                                     <div class="form-floating mb-3 mb-md-0">
-                                                        <form:input class="form-control" id="inputFirstName" type="text" placeholder="Enter your first name" 
+                                                        <form:input class="form-control ${not empty errorFirstName ? 'is-invalid' : ''}" 
+                                                                    id="inputFirstName" 
+                                                                    type="text" 
+                                                                    placeholder="Enter your first name" 
                                                                     path="firstName"/>
                                                         <label for="inputFirstName" class="form-label">First name</label>
+                                                        ${errorFirstName}
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -60,9 +73,13 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <div class="form-floating mb-3 mb-md-0">
-                                                        <form:input class="form-control" id="inputPassword" type="password" placeholder="Create a password" 
+                                                        <form:input class="form-control ${not empty errorPassword ? 'is-invalid' : ''}"
+                                                                    id="inputPassword" 
+                                                                    type="password" 
+                                                                    placeholder="Create a password" 
                                                                     path="password"/>
                                                         <label for="inputPassword" class="form-label">Password</label>
+                                                        ${errorPassword}
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -83,7 +100,7 @@
                                         </form:form>
                                     </div>
                                     <div class="card-footer text-center py-3">
-                                        <div class="small"><a href="login.html">Have an account? Go to login</a></div>
+                                        <div class="small"><a href="/login">Have an account? Go to login</a></div>
                                     </div>
                                 </div>
                             </div>

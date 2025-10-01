@@ -1,12 +1,23 @@
 package com.basis.anhangda37.domain.domain;
 
+import com.basis.anhangda37.service.validator.CustomEmail;
 import com.basis.anhangda37.service.validator.RegisterChecked;
+import com.basis.anhangda37.service.validator.StrongPassword;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @RegisterChecked
 public class RegisterDto {
     private String firstName;
     private String lastName;
+
+    @Email(message = "")
+    @CustomEmail(suffix = "@gmail.com")
     private String email;
+
+    @StrongPassword
     private String password;
     private String confirmPassword;
 

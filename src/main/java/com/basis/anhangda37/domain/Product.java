@@ -22,26 +22,14 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @NotBlank
     private String name;
-
-    @NotNull
-    @NumberFormat
-    @Min(0)
     private Double price;
-
     private String image;
 
-    @NotNull
-    @NotBlank
     @Column(columnDefinition = "MEDIUMTEXT")
     private String detailDesc;
     private String shortDesc;
 
-    @NotNull
-    @NumberFormat
-    @Min(1)
     private Long quantity;
     private Long sold = 0L;
     private String factory;

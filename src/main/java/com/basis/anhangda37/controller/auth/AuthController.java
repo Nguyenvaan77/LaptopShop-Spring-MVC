@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.basis.anhangda37.domain.User;
+import com.basis.anhangda37.domain.domain.LoginDto;
 import com.basis.anhangda37.domain.domain.RegisterDto;
 import com.basis.anhangda37.service.UserService;
 
@@ -52,5 +53,15 @@ public class AuthController {
         userService.saveUser(user);
         return "redirect:/";
     }
+
+    @GetMapping("/login")
+    public String getLoginPage(Model model) {
+        model.addAttribute("loginDto", new LoginDto());
+        return "/client/auth/login";
+    }
     
+    @GetMapping("/hello")
+    public String getHelloPage() {
+        return "/hello";
+    }
 }
