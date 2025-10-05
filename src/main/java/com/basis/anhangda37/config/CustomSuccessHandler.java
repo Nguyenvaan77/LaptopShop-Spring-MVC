@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -26,10 +27,11 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
         roleTargetUrlMap.put("ROLE_USER", "/");
 
         final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        for(final GrantedAuthority grantedAuthority : authorities) {
+
+        for(final GrantedAuthority grantedAuthority : authorities) {   
             String authorityName = grantedAuthority.getAuthority();
             if(roleTargetUrlMap.containsKey(authorityName)) {
-                return roleTargetUrlMap.get(authorities);
+                return roleTargetUrlMap.get(authorityName);
             }
         }
 

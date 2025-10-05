@@ -29,5 +29,7 @@ public class ItemController {
     public String getMethodName() {
         return "client/product/detail";
     }
+
     
+
 }
