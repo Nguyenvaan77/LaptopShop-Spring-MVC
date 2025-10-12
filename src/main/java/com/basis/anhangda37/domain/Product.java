@@ -38,11 +38,14 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<OrderDetail> orderDetails;
 
+    @OneToMany(mappedBy = "product")
+    private List<CartDetail> cartDetails;
+
     public Product() {
     }
 
     public Product(Long id, String name, Double price, String image, String detailDesc, String shortDesc, Long quantity,
-            Long sold, String factory, String target) {
+            Long sold, String factory, String target, List<OrderDetail> orderDetails, List<CartDetail> cartDetails) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -53,6 +56,27 @@ public class Product {
         this.sold = sold;
         this.factory = factory;
         this.target = target;
+        this.orderDetails = orderDetails;
+        this.cartDetails = cartDetails;
+    }
+
+
+
+
+    public List<OrderDetail> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(List<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
+    }
+
+    public List<CartDetail> getCartDetails() {
+        return cartDetails;
+    }
+
+    public void setCartDetails(List<CartDetail> cartDetails) {
+        this.cartDetails = cartDetails;
     }
 
     public Long getId() {

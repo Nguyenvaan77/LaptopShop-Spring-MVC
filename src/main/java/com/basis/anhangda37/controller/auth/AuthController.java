@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.basis.anhangda37.domain.User;
-import com.basis.anhangda37.domain.domain.LoginDto;
-import com.basis.anhangda37.domain.domain.RegisterDto;
+import com.basis.anhangda37.domain.dto.LoginDto;
+import com.basis.anhangda37.domain.dto.RegisterDto;
 import com.basis.anhangda37.service.UserService;
 
 import jakarta.validation.Valid;

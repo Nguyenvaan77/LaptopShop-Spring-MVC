@@ -2,8 +2,6 @@ package com.basis.anhangda37.controller.admin;
 
 import java.util.List;
 
-import org.aspectj.util.LangUtil.ProcessController;
-import org.springframework.data.domain.jaxb.SortAdapter;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.basis.anhangda37.domain.Product;
-import com.basis.anhangda37.domain.User;
-import com.basis.anhangda37.repository.ProductRepository;
 import com.basis.anhangda37.service.ProductService;
 import com.basis.anhangda37.service.UploadService;
 
