@@ -1,4 +1,4 @@
-package com.basis.anhangda37.domain.domain;
+package com.basis.anhangda37.domain.dto;
 
 import com.basis.anhangda37.service.validator.CustomEmail;
 

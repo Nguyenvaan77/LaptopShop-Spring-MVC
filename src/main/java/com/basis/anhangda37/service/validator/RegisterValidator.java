@@ -2,7 +2,7 @@ package com.basis.anhangda37.service.validator;
 
 import org.springframework.stereotype.Service;
 
-import com.basis.anhangda37.domain.domain.RegisterDto;
+import com.basis.anhangda37.domain.dto.RegisterDto;
 import com.basis.anhangda37.repository.UserRepository;
 
 import jakarta.validation.ConstraintValidator;

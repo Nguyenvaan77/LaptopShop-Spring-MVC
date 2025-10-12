@@ -34,7 +34,10 @@
                             <c:if test = "${not empty pageContext.request.userPrincipal}">
                                 <a href="#" class="position-relative me-4 my-auto">
                                     <i class="fa fa-shopping-bag fa-2x"></i>
-                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
+                                    <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">
+                                        <c:out value = "${sessionScope.sum}" />
+                                        
+                                    </span>
                                 </a>
 
                                 <div class="dropdown my-auto">
@@ -46,9 +49,11 @@
                                     <ul class="dropdown-menu dropdown-menu-end p-4" aria-labelledby="dropdownMenuLink">
                                         <li class="d-flex align-items-center flex-column" style="min-width: 300px;">
                                             <img style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden;"
-                                                src="/images/product/1758807320297-acer-aspire-lite.jpg" />
+                                                src="${sessionScope.avatar}" />
                                             <div class="text-center my-3">
-                                                <c:out value = "${pageContext.request.userPrincipal.name}" />
+                                                <!-- <c:out value = "${pageContext.request.userPrincipal.name}" /> -->
+                                                 <!-- <c:out value = "${pageContext.request.userPrincipal.name}" /> -->
+                                                  <c:out value = "${sessionScope.fullName}" />
                                             </div>
                                         </li>
 

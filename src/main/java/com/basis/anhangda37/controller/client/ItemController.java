@@ -30,6 +30,9 @@ public class ItemController {
         return "client/product/detail";
     }
 
-    
+    @GetMapping("/cart")
+    public String getCartPage() {
+        return "client/cart/show";
+    }
 
 }
