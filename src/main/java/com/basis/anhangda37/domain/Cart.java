@@ -7,6 +7,8 @@ import javax.smartcardio.CardTerminal;
 
 import org.springframework.security.authentication.CachingUserDetailsService;
 
+import com.mysql.cj.log.Log;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,28 +23,28 @@ import jakarta.persistence.Table;
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "cart")
-    private List<CartDetail> cartDetails = new ArrayList<>();
+    private List<CartDetail> cartDetails;
 
     private Integer sum;
 
     public Cart() {
     }
 
-    public Cart(Integer id, User user, List<CartDetail> cartDetails, Integer sum) {
+    public Cart(Long id, User user, List<CartDetail> cartDetails, Integer sum) {
         this.id = id;
         this.user = user;
         this.cartDetails = cartDetails;
         this.sum = sum;
     }
 
-    public void addCartDetail(CartDetail cartDetail){
+    public void addCartDetail(CartDetail cartDetail) {
         cartDetails.add(cartDetail);
         ++sum;
     }
@@ -52,11 +54,11 @@ public class Cart {
         --sum;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -84,5 +86,4 @@ public class Cart {
         this.sum = sum;
     }
 
-    
 }

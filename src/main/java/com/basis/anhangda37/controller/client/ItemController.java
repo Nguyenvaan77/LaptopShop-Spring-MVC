@@ -1,5 +1,7 @@
 package com.basis.anhangda37.controller.client;
 
+import java.util.List;
+
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Producer;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,15 +9,33 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.basis.anhangda37.domain.Cart;
+import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Product;
+import com.basis.anhangda37.domain.User;
+import com.basis.anhangda37.domain.dto.CartDetailDto;
+import com.basis.anhangda37.service.CartDetailService;
+import com.basis.anhangda37.service.CartService;
 import com.basis.anhangda37.service.ProductService;
+import com.basis.anhangda37.service.UserService;
+import com.mysql.cj.exceptions.DeadlockTimeoutRollbackMarker;
+
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class ItemController {
     private final ProductService productService;
+    private final UserService userService;
+    private final CartService cartService;
+    private final CartDetailService cartDetailService;
 
-    public ItemController(ProductService productService) {
+    public ItemController(ProductService productService, UserService userService, CartService cartService, CartDetailService cartDetailService) {
         this.productService = productService;
+        this.userService = userService;
+        this.cartService = cartService;
+        this.cartDetailService = cartDetailService;
     }
 
     @GetMapping("/product/{id}")
@@ -31,7 +51,18 @@ public class ItemController {
     }
 
     @GetMapping("/cart")
-    public String getCartPage() {
+    public String getCartPage(Model model, HttpServletRequest httpServletRequest) {
+        HttpSession session = httpServletRequest.getSession();
+        User user = userService.getUserByEmail((String)session.getAttribute("email"));
+        Cart cart = cartService.findCartByUser(user);
+        List<CartDetail> cartDetails = cartDetailService.getCartDetailByCart(cart);
+        List<CartDetailDto> cartDetailDtos = cartDetailService.convertCartDetailToDto(cartDetails);
+        double totalPayment = 0;
+        for (CartDetailDto cartDetailDto : cartDetailDtos) {
+            totalPayment += cartDetailDto.getTotal();
+        }
+        model.addAttribute("cartDetails", cartDetailDtos);
+        model.addAttribute("totalPayment", totalPayment);
         return "client/cart/show";
     }
 

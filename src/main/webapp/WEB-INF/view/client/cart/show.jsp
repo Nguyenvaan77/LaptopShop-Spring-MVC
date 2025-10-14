@@ -1,14 +1,18 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-        <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+        <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
 
-    <!-- Google Web Fonts -->
+    <head>
+        <meta charset="utf-8">
+        <title>Fruitables - Vegetable Website Template</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="" name="keywords">
+        <meta content="" name="description">
+
+        <!-- Google Web Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
@@ -27,190 +31,106 @@
 
         <!-- Template Stylesheet -->
         <link href="/client/css/style.css" rel="stylesheet">
-</head>
+    </head>
+
     <body>
         <jsp:include page="../layout/header.jsp" />
 
-        <section class="h-100">
-            <div class="container h-100 py-5">
-                <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-10">
+        
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-normal mb-0">Shopping Cart</h3>
-                    <div>
-                        <p class="mb-0"><span class="text-muted">Sort by:</span> <a href="#!" class="text-body">price <i
-                            class="fas fa-angle-down mt-1"></i></a></p>
-                    </div>
-                    </div>
 
-                    <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                        <div class="col-md-2 col-lg-2 col-xl-2">
-                            <img
-                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                            class="img-fluid rounded-3" alt="Cotton T-shirt">
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-3">
-                            <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            <p><span class="text-muted">Size: </span>M <span class="text-muted">Color: </span>Grey</p>
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                            <i class="fas fa-minus"></i>
-                            </button>
-
-                            <input id="form1" min="0" name="quantity" value="2" type="number"
-                            class="form-control form-control-sm" />
-
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                            <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                            <h5 class="mb-0">$499.00</h5>
-                        </div>
-                        <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                            <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                        <div class="col-md-2 col-lg-2 col-xl-2">
-                            <img
-                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                            class="img-fluid rounded-3" alt="Cotton T-shirt">
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-3">
-                            <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            <p><span class="text-muted">Size: </span>M <span class="text-muted">Color: </span>Grey</p>
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                            <i class="fas fa-minus"></i>
-                            </button>
-
-                            <input id="form1" min="0" name="quantity" value="2" type="number"
-                            class="form-control form-control-sm" />
-
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                            <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                            <h5 class="mb-0">$499.00</h5>
-                        </div>
-                        <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                            <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                        <div class="col-md-2 col-lg-2 col-xl-2">
-                            <img
-                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                            class="img-fluid rounded-3" alt="Cotton T-shirt">
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-3">
-                            <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            <p><span class="text-muted">Size: </span>M <span class="text-muted">Color: </span>Grey</p>
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                            <i class="fas fa-minus"></i>
-                            </button>
-
-                            <input id="form1" min="0" name="quantity" value="2" type="number"
-                            class="form-control form-control-sm" />
-
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                            <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                            <h5 class="mb-0">$499.00</h5>
-                        </div>
-                        <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                            <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="card rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row d-flex justify-content-between align-items-center">
-                        <div class="col-md-2 col-lg-2 col-xl-2">
-                            <img
-                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                            class="img-fluid rounded-3" alt="Cotton T-shirt">
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-3">
-                            <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                            <p><span class="text-muted">Size: </span>M <span class="text-muted">Color: </span>Grey</p>
-                        </div>
-                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                            <i class="fas fa-minus"></i>
-                            </button>
-
-                            <input id="form1" min="0" name="quantity" value="2" type="number"
-                            class="form-control form-control-sm" />
-
-                            <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                            <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                            <h5 class="mb-0">$499.00</h5>
-                        </div>
-                        <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                            <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="card mb-4">
-                    <div class="card-body p-4 d-flex flex-row">
-                        <div data-mdb-input-init class="form-outline flex-fill">
-                        <input type="text" id="form1" class="form-control form-control-lg" />
-                        <label class="form-label" for="form1">Discound code</label>
-                        </div>
-                        <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-warning btn-lg ms-3">Apply</button>
-                    </div>
-                    </div>
-
-                    <div class="card">
-                    <div class="card-body">
-                        <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
-                    </div>
-                    </div>
-
+        <!-- Cart Page Start -->
+        <div class="container-fluid py-5">
+            <div class="container py-5">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Products</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Handle</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var = "product" items = "${cartDetails}">
+                                <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <img src="${product.image}" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt="">
+                                    </div>
+                                </th>
+                                <td>
+                                    <a href="/product/${product.productId}"><p class="mb-0 mt-4">${product.name}</p></a>
+                                </td>
+                                <td>
+                                    <p class="mb-0 mt-4">${product.price} $</p>
+                                </td>
+                                <td>
+                                    <div class="input-group quantity mt-4" style="width: 100px;">
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
+                                            <i class="fa fa-minus"></i>
+                                            </button>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm text-center border-0" value="${product.quantity}">
+                                        <div class="input-group-btn">
+                                            <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="mb-0 mt-4">${product.total} $</p>
+                                </td>
+                                <td>
+                                    <button class="btn btn-md rounded-circle bg-light border mt-4" >
+                                        <i class="fa fa-times text-danger"></i>
+                                    </button>
+                                </td>
+                            
+                            </tr>
+                            </c:forEach> 
+                            
+                            
+                        </tbody>
+                    </table>
                 </div>
+                <div class="mt-5">
+                    <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
+                </div>
+                <div class="row g-4 justify-content-end">
+                    <div class="col-8"></div>
+                    <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                        <div class="bg-light rounded">
+                            <div class="p-4">
+                                <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                                <div class="d-flex justify-content-between mb-4">
+                                    <h5 class="mb-0 me-4">Subtotal:</h5>
+                                    <p class="mb-0">$ ${totalPayment}</p>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-0 me-4">Shipping</h5>
+                                    <div class="">
+                                        <p class="mb-0">Flat rate: None</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                                <h5 class="mb-0 ps-4 me-4">Total</h5>
+                                <p class="mb-0 pe-4">$ ${totalPayment}</p>
+                            </div>
+                            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
-
-        <jsp:include page="../layout/footer.jsp" />
-
+        </div>
+        <!-- Cart Page End -->
 
         <!-- Back to Top -->
         <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>   
@@ -227,4 +147,5 @@
     <!-- Template Javascript -->
     <script src="/client/js/main.js"></script>
     </body>
+
 </html>
