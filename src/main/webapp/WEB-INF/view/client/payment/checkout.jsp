@@ -70,21 +70,11 @@
                                 </td>
                                 <td>
                                     <div class="input-group quantity mt-4" style="width: 100px;">
-                                        <div class="input-group-btn">
-                                            <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                            <i class="fa fa-minus"></i>
-                                            </button>
-                                        </div>
                                         <input type="text" class="form-control form-control-sm text-center border-0" 
                                             value="${cartDetail.quantity}" 
                                             cart-detail-id = "${cartDetail.cartDetailId}"
                                             cart-detail-price = "${cartDetail.price}"
                                             cart-detail-quantity-in-stock = "${cartDetail.quantityInStock}">
-                                        <div class="input-group-btn">
-                                            <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                                <i class="fa fa-plus"></i>
-                                            </button>
-                                        </div>
                                     </div>
                                 </td>
                                 <td>

@@ -131,21 +131,102 @@
 
 
 
-    // Product Quantity
+    // // Product Quantity
+    // $('.quantity button').on('click', function () {
+    //     var button = $(this);
+    //     var oldValue = button.parent().parent().find('input').val();
+    //     if (button.hasClass('btn-plus')) {
+    //         var newVal = parseFloat(oldValue) + 1;
+    //     } else {
+    //         if (oldValue > 0) {
+    //             var newVal = parseFloat(oldValue) - 1;
+    //         } else {
+    //             newVal = 0;
+    //         }
+    //     }
+    //     button.parent().parent().find('input').val(newVal);
+    // });
+
     $('.quantity button').on('click', function () {
-        var button = $(this);
-        var oldValue = button.parent().parent().find('input').val();
-        if (button.hasClass('btn-plus')) {
-            var newVal = parseFloat(oldValue) + 1;
-        } else {
-            if (oldValue > 0) {
-                var newVal = parseFloat(oldValue) - 1;
-            } else {
-                newVal = 0;
-            }
+    let change = 0;
+
+    const button = $(this);
+    const input = button.parent().parent().find('input');
+    const oldValue = parseFloat(input.val());
+    const quantityInStock = input.attr("cart-detail-quantity-in-stock");
+
+    let newVal = oldValue;
+
+    if (button.hasClass('btn-plus')) {
+        if(newVal < quantityInStock) {
+            newVal = oldValue + 1;
+            change = 1; // tăng thì cộng vào tổng
         }
-        button.parent().parent().find('input').val(newVal);
+    } else {
+        if (oldValue > 1) {
+            newVal = oldValue - 1;
+            change = -1; // giảm thì trừ khỏi tổng
+        } else {
+            newVal = 1;
+        }
+    }
+
+    const plusBtn = button.parent().parent().find('.btn-plus');
+    const minusBtn = button.parent().parent().find('.btn-minus');
+
+    if(newVal >= quantityInStock) {
+        plusBtn.prop('disabled', true);
+    } else {
+        plusBtn.prop('disabled', false);
+    }
+
+    if(newVal < 2) {
+        minusBtn.prop('disabled', true);
+    } else {
+        minusBtn.prop('disabled', false);
+    }
+    
+
+    input.val(newVal);
+
+    const price = parseFloat(input.attr("cart-detail-price"));
+    const id = input.attr("cart-detail-id");
+
+    const priceElement = $(`p[cart-detail-id='${id}']`);
+    if (priceElement.length) {
+        const newPrice = price * newVal;
+        priceElement.text(formatCurrency(newPrice.toFixed(0)) + " đ");
+    }
+
+    const totalPriceElement = $(`p[cart-total-price]`);
+
+    if (totalPriceElement.length) {
+        const currentTotal = parseFloat(totalPriceElement.first().attr("cart-total-price"));
+        let newTotal = currentTotal + (change * price);
+
+        // Đảm bảo không bị NaN
+        if (isNaN(newTotal)) newTotal = 0;
+
+        totalPriceElement.each(function (index, element) {
+            $(element).text(formatCurrency(newTotal.toFixed(0)) + " đ");
+            $(element).attr("cart-total-price", newTotal);
+        });
+    }
+});
+
+// ---- Hàm format tiền tệ ----
+function formatCurrency(value) {
+    const formatter = new Intl.NumberFormat('vi-VN', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
     });
+
+    let formatted = formatter.format(value);
+    formatted = formatted.replace(/\./g, ',');
+    return formatted;
+}
+
+
 
 })(jQuery);
 

@@ -70,7 +70,7 @@ public class ProductService {
 
             CartDetail newCartDetail = new CartDetail();
             newCartDetail.setCart(newCart);
-            newCartDetail.setQuantity(1);
+            newCartDetail.setQuantity(1L);
             newCartDetail.setProduct(product);
 
             newCart.addCartDetail(newCartDetail);
@@ -84,7 +84,7 @@ public class ProductService {
         if (existCartDetail == null) {
             CartDetail newCartDetail = new CartDetail();
             newCartDetail.setProduct(product);
-            newCartDetail.setQuantity(1);
+            newCartDetail.setQuantity(1L);
             newCartDetail.setCart(cart);
             cart.addCartDetail(newCartDetail);
             cartDetailRepository.save(newCartDetail);

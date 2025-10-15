@@ -2,6 +2,7 @@ package com.basis.anhangda37.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,14 @@ public class CartDetailService {
         return cartDetailRepository.findByCart(cart);
     }
 
+    public void deleteCartDetail(CartDetail cartDetail) {
+        cartDetailRepository.deleteById(cartDetail.getId());
+    }
+
+    public Optional<CartDetail> getCartDetailById(Long id) {
+        return cartDetailRepository.findById(id);
+    }
+
     public List<CartDetailDto> convertCartDetailToDto(List<CartDetail> cartDetails) {
         List<CartDetailDto> cartDetailDtos = new ArrayList<>();
         for (CartDetail eachCartDetail : cartDetails) {
@@ -33,6 +42,8 @@ public class CartDetailService {
             cartDetailDto.setPrice(product.getPrice());
             cartDetailDto.setQuantity(eachCartDetail.getQuantity());
             cartDetailDto.setProductId(product.getId());
+            cartDetailDto.setCartDetailId(eachCartDetail.getId());
+            cartDetailDto.setQuantityInStock(product.getQuantity());
             cartDetailDtos.add(cartDetailDto);
         }
         return cartDetailDtos;
