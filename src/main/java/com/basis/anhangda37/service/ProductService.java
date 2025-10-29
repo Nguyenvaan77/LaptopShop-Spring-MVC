@@ -1,18 +1,24 @@
 package com.basis.anhangda37.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.NameNotFoundException;
 
 import org.springframework.boot.autoconfigure.jms.JmsProperties.Listener.Session;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
+import com.basis.anhangda37.domain.Order;
+import com.basis.anhangda37.domain.OrderDetail;
 import com.basis.anhangda37.domain.Product;
 import com.basis.anhangda37.domain.User;
 import com.basis.anhangda37.repository.CartDetailRepository;
 import com.basis.anhangda37.repository.CartRepository;
+import com.basis.anhangda37.repository.OrderDetailRepository;
+import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.repository.ProductRepository;
 import com.basis.anhangda37.repository.UserRepository;
 
@@ -20,17 +26,28 @@ import jakarta.servlet.http.HttpSession;
 
 @Service
 public class ProductService {
+
+    private final CartService cartService;
+
+    private final CartDetailService cartDetailService;
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartDetailRepository cartDetailRepository;
 
     public ProductService(UserRepository userRepository, ProductRepository productRepository,
-            CartRepository cartRepository, CartDetailRepository cartDetailRepository) {
+            CartRepository cartRepository, CartDetailRepository cartDetailRepository, OrderRepository orderRepository,
+            OrderDetailRepository orderDetailRepository, CartDetailService cartDetailService, CartService cartService) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.cartDetailRepository = cartDetailRepository;
+        this.orderDetailRepository = orderDetailRepository;
+        this.orderRepository = orderRepository;
+        this.cartDetailService = cartDetailService;
+        this.cartService = cartService;
     }
 
     public Product getProductById(Long id) {
@@ -65,7 +82,7 @@ public class ProductService {
         if (cart == null) {
             Cart newCart = new Cart();
             newCart.setUser(user);
-            newCart.setSum(1);
+            newCart.setSum(0);
             cartRepository.save(newCart);
 
             CartDetail newCartDetail = new CartDetail();
@@ -94,5 +111,31 @@ public class ProductService {
 
         existCartDetail.setQuantity(existCartDetail.getQuantity() + 1);
         cartDetailRepository.save(existCartDetail);
+    }
+
+    public void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
+        if (cartDetails == null || cartDetails.isEmpty()) {
+            return;
+        }
+
+        for (CartDetail cartDetail : cartDetails) {
+            cartDetail = cartDetailRepository.findById(cartDetail.getId()).get();
+            Product product = cartDetail.getProduct();
+            Long quantityToSold = cartDetail.getQuantity();
+            product.setQuantity(product.getQuantity() - quantityToSold);
+            product.setSold(product.getQuantity() + quantityToSold);
+            productRepository.save(product);
+            cartDetailRepository.save(cartDetail);
+        }
+    }
+
+    @Transactional
+    public void handlePlaceOrder(User user, HttpSession session, String receiverName, String receiverAddress, String receiverPhone) {
+        Order order = new Order();
+        order.setReceiverAddress(receiverAddress);
+        order.setReceiverName(receiverName);
+        order.setReceiverPhone(receiverPhone);
+        order.setUser(user);
+        order.set
     }
 }

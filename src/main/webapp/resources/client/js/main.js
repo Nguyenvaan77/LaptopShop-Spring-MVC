@@ -189,6 +189,10 @@
 
     input.val(newVal);
 
+    const index = input.attr("cart-detail-index");
+    const el = document.getElementById(`cartDetails${index}.quantity`);
+    $(el).val(newVal);
+
     const price = parseFloat(input.attr("cart-detail-price"));
     const id = input.attr("cart-detail-id");
 

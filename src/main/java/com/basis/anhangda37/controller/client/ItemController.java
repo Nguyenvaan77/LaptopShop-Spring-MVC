@@ -73,6 +73,7 @@ public class ItemController {
         }
         model.addAttribute("cartDetails", cartDetailDtos);
         model.addAttribute("totalPayment", totalPayment);
+        model.addAttribute("cart", cart);
         return "client/cart/show";
     }
 

@@ -1,7 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -55,7 +54,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                            <c:forEach var = "cartDetail" items = "${cartDetails}">
+                            <c:forEach var = "cartDetail" items = "${cartDetails}" varStatus = "status">
                                 <tr>
                                 <th scope="row">
                                     <div class="d-flex align-items-center">
@@ -79,7 +78,8 @@
                                             value="${cartDetail.quantity}" 
                                             cart-detail-id = "${cartDetail.cartDetailId}"
                                             cart-detail-price = "${cartDetail.price}"
-                                            cart-detail-quantity-in-stock = "${cartDetail.quantityInStock}">
+                                            cart-detail-quantity-in-stock = "${cartDetail.quantityInStock}"
+                                            cart-detail-index = "${status.index}">
                                         <div class="input-group-btn">
                                             <button class="btn btn-sm btn-plus rounded-circle bg-light border">
                                                 <i class="fa fa-plus"></i>
@@ -111,34 +111,52 @@
                 </div>
                 <c:if test = "${not empty cartDetails}">
                     <div class="mt-5">
-                    <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
-                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
-                </div>
-                <div class="row g-4 justify-content-end">
-                    <div class="col-8"></div>
-                    <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
-                        <div class="bg-light rounded">
-                            <div class="p-4">
-                                <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
-                                <div class="d-flex justify-content-between mb-4">
-                                    <h5 class="mb-0 me-4">Subtotal:</h5>
-                                    <p class="mb-0" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <h5 class="mb-0 me-4">Shipping</h5>
-                                    <div class="">
-                                        <p class="mb-0">Flat rate: None</p>
+                        <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
+                    </div>
+                    <div class="row g-4 justify-content-end">
+                        <div class="col-8"></div>
+                        <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                            <div class="bg-light rounded">
+                                <div class="p-4">
+                                    <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                                    <div class="d-flex justify-content-between mb-4">
+                                        <h5 class="mb-0 me-4">Subtotal:</h5>
+                                        <p class="mb-0" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="mb-0 me-4">Shipping</h5>
+                                        <div class="">
+                                            <p class="mb-0">Flat rate: None</p>
+                                        </div>
                                     </div>
                                 </div>
+                                <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                                    <h5 class="mb-0 ps-4 me-4">Total</h5>
+                                    <p class="mb-0 pe-4" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
+                                </div>
+                                <form:form action = "/confirm-checkout" method = "post" modelAttribute="cart">
+                                    <input type="hidden" name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
+                                    <div style= "display: block;">
+                                        <c:forEach var = "cartDetail" items = "${cart.cartDetails}" varStatus = "status">
+                                            <form:input class="form-control" 
+                                                        type="text" 
+                                                        value = "${cartDetail.id}"
+                                                        path="cartDetails[${status.index}].id"/>
+
+                                            <form:input class="form-control" 
+                                                        type="text" 
+                                                        value = "${cartDetail.quantity}"
+                                                        path="cartDetails[${status.index}].quantity"/>
+                                        </c:forEach>
+                                        
+                                    </div>
+                                    <button class="btn btn-primary btn-success border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit">Confirm checkout</button>
+                                </form:form>
+                                
                             </div>
-                            <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
-                                <h5 class="mb-0 ps-4 me-4">Total</h5>
-                                <p class="mb-0 pe-4" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
-                            </div>
-                            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
                         </div>
                     </div>
-                </div>
                 </c:if>
                 
             </div>

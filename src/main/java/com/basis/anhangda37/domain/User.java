@@ -54,6 +54,14 @@ public class User {
         this.role = role;
         this.orders = orders;
     }
+ 
+    public void addOrder(Order order) {
+        orders.add(order);
+    }
+
+    public void removeCart() {
+        this.cart = null;
+    }
     
     public Long getId() {
         return id;

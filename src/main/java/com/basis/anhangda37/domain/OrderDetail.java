@@ -18,6 +18,7 @@ public class OrderDetail {
     private Long id;
 
     private Long quantity;
+
     private Double price;
 
     @ManyToOne
@@ -31,10 +32,30 @@ public class OrderDetail {
     public OrderDetail() {
     }
 
-    public OrderDetail(Long id, Order order, Product product) {
+    public OrderDetail(Long id, Order order, Product product, Long quantity, Double price) {
         this.id = id;
         this.order = order;
         this.product = product;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
+    
+
+    public Long getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     public Long getId() {

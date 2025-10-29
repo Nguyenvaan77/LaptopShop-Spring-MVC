@@ -1,7 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,11 +50,10 @@
                             <th scope="col">Price</th>
                             <th scope="col">Quantity</th>
                             <th scope="col">Total</th>
-                            <th scope="col">Handle</th>
                           </tr>
                         </thead>
                         <tbody>
-                            <c:forEach var = "cartDetail" items = "${cartDetails}">
+                            <c:forEach var = "cartDetail" items = "${cartDetails}" varStatus = "status">
                                 <tr>
                                 <th scope="row">
                                     <div class="d-flex align-items-center">
@@ -70,11 +68,14 @@
                                 </td>
                                 <td>
                                     <div class="input-group quantity mt-4" style="width: 100px;">
+                                        
                                         <input type="text" class="form-control form-control-sm text-center border-0" 
                                             value="${cartDetail.quantity}" 
                                             cart-detail-id = "${cartDetail.cartDetailId}"
                                             cart-detail-price = "${cartDetail.price}"
-                                            cart-detail-quantity-in-stock = "${cartDetail.quantityInStock}">
+                                            cart-detail-quantity-in-stock = "${cartDetail.quantityInStock}"
+                                            cart-detail-index = "${status.index}">
+                                        
                                     </div>
                                 </td>
                                 <td>
@@ -83,52 +84,88 @@
                                             value = "${cartDetail.price * cartDetail.quantity}" />${cartDetail.total} đ
                                     </p>
                                 </td>
-                                <td>
-                                    <form action="/remove-product-from-cart/${cartDetail.cartDetailId}" method="post">
-                                        <input type="hidden" name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
-                                        <button class="btn btn-md rounded-circle bg-light border mt-4" >
-                                        <i class="fa fa-times text-danger"></i>
-                                        </button>
-                                    </form>
-                                </td>
                             
                             </tr>
                             </c:forEach> 
-                            
-                            
                         </tbody>
                     </table>
                 </div>
                 <c:if test = "${not empty cartDetails}">
                     <div class="mt-5">
-                    <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
-                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
-                </div>
-                <div class="row g-4 justify-content-end">
-                    <div class="col-8"></div>
-                    <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
-                        <div class="bg-light rounded">
-                            <div class="p-4">
-                                <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
-                                <div class="d-flex justify-content-between mb-4">
-                                    <h5 class="mb-0 me-4">Subtotal:</h5>
-                                    <p class="mb-0" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <h5 class="mb-0 me-4">Shipping</h5>
-                                    <div class="">
-                                        <p class="mb-0">Flat rate: None</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
-                                <h5 class="mb-0 ps-4 me-4">Total</h5>
-                                <p class="mb-0 pe-4" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
-                            </div>
-                            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
-                        </div>
+                        <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
                     </div>
-                </div>
+                    <form:form action = "/confirm-order" method = "post" modelAttribute="cart">
+                        <div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="inputName" 
+                                            type="text" 
+                                            name = "customerName"/>
+                                <label for="inputName" class="form-label">Customer name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="inputName" 
+                                            type="text" 
+                                            name = "customerAddress"/>
+                                <label for="inputAddress" class="form-label">Customer address</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="inputPhone" 
+                                            type="number" 
+                                            name = "customerPhone"/>
+                                <label for="inputPhone" class="form-label">Customer phone</label>
+                            </div>
+                        </div>
+                        <div class="row g-4 justify-content-end">
+                            <div class="col-8"></div>
+                            <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                                <div class="bg-light rounded">
+                                    <div class="p-4">
+                                        <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <h5 class="mb-0 me-4">Subtotal:</h5>
+                                            <p class="mb-0" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <h5 class="mb-0 me-4">Shipping</h5>
+                                            <div class="">
+                                                <p class="mb-0">Flat rate: None</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                                        <h5 class="mb-0 ps-4 me-4">Total</h5>
+                                        <p class="mb-0 pe-4" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
+                                    </div>
+                                    
+                                        <input type="hidden" name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
+                                        <div style = "display: none">
+                                            <c:forEach var = "cartDetail" items = "${cart.cartDetails}" varStatus = "status">
+                                                <form:input class="form-control" 
+                                                            type="text" 
+                                                            value = "${cartDetail.id}"
+                                                            path="cartDetails[${status.index}].id"/>
+
+                                                <form:input class="form-control" 
+                                                            type="text" 
+                                                            value = "${cartDetail.quantity}"
+                                                            path="cartDetails[${status.index}].quantity"/>
+                                            </c:forEach>
+                                            
+                                        </div>
+                                        <button class="btn btn-primary btn-success border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit">Confirm order</button>
+                                        
+                                    </form:form>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    
                 </c:if>
                 
             </div>
