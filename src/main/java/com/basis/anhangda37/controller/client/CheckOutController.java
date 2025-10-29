@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
+
 import com.basis.anhangda37.controller.auth.AuthController;
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
@@ -87,12 +89,15 @@ public class CheckOutController {
                                     @RequestParam("customerName") String name,
                                    @RequestParam("customerAddress") String address,
                                    @RequestParam("customerPhone") String phone,
-                                   @ModelAttribute("cart") Cart cart
+                                   @RequestParam("totalPayment") Double totalPayment,
+                                   @ModelAttribute("cart") Cart cart,
+                                   Model model
                                    ) {
-        HttpSession session = request.getSession();
-        User user = userService.getUserByEmail((String)session.getAttribute("email"));
-        List<CartDetail> cartDetails = cart.getCartDetails();
-
-        return "redirect:/thanks";
+    HttpSession session = request.getSession();
+    String email = ((String)session.getAttribute("email"));
+    List<CartDetail> cartDetails = cart.getCartDetails();
+    String orderCode = productService.handleCheckOut(email, session, name, address, phone, totalPayment, cartDetails);
+    model.addAttribute("orderCode", orderCode);
+    return "client/cart/thanks";
     }
 }

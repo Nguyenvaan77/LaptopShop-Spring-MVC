@@ -92,7 +92,6 @@ public class ProductService {
 
             newCart.addCartDetail(newCartDetail);
             cartRepository.save(newCart);
-            cartDetailRepository.save(newCartDetail);
             session.setAttribute("sum", newCart.getSum());
             return;
         }
@@ -113,29 +112,75 @@ public class ProductService {
         cartDetailRepository.save(existCartDetail);
     }
 
-    public void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
+    @Transactional
+    public String handleCheckOut(String email, HttpSession session, String receiverName, String receiverAddress,
+            String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
+        handleProductBeforeCheckout(cartDetails);
+        return handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
+    }
+
+    private void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
         if (cartDetails == null || cartDetails.isEmpty()) {
             return;
         }
 
-        for (CartDetail cartDetail : cartDetails) {
-            cartDetail = cartDetailRepository.findById(cartDetail.getId()).get();
-            Product product = cartDetail.getProduct();
-            Long quantityToSold = cartDetail.getQuantity();
+        for (CartDetail cartDetailDto : cartDetails) {
+            CartDetail fetchCartDetail = cartDetailRepository.findById(cartDetailDto.getId()).get();
+            Product product = fetchCartDetail.getProduct();
+            Long quantityToSold = cartDetailDto.getQuantity();
+            fetchCartDetail.setQuantity(quantityToSold);
             product.setQuantity(product.getQuantity() - quantityToSold);
-            product.setSold(product.getQuantity() + quantityToSold);
             productRepository.save(product);
-            cartDetailRepository.save(cartDetail);
+            cartDetailRepository.save(fetchCartDetail);
         }
     }
 
-    @Transactional
-    public void handlePlaceOrder(User user, HttpSession session, String receiverName, String receiverAddress, String receiverPhone) {
+    private String handlePlaceOrder(String email, HttpSession session, String receiverName, String receiverAddress,
+            String receiverPhone, Double totalPayment) {
+        // User user = userRepository.findByEmail(email);
+        // Cart cart = user.getCart();
+
+        // cart.removeAllCartDetail();
+        // cartRepository.save(cart);
+        // user.removeCart();
+        // cart.setUser(null);
+        // cartRepository.deleteById(cart.getId());
+
+        User managedUser = userRepository.findByEmail(email);
         Order order = new Order();
         order.setReceiverAddress(receiverAddress);
         order.setReceiverName(receiverName);
         order.setReceiverPhone(receiverPhone);
-        order.setUser(user);
-        order.set
+        order.setUser(managedUser);
+        order.setTotalPrice(totalPayment);
+
+        Cart cart = cartRepository.findByUser(managedUser);
+        List<CartDetail> cartDetails = cartDetailRepository.findByCart(cart);
+
+        List<OrderDetail> orderDetails = new ArrayList<>();
+
+        for (CartDetail cartDetail : cartDetails) {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setQuantity(cartDetail.getQuantity());
+            orderDetail.setProduct(cartDetail.getProduct());
+            orderDetail.setPrice(cartDetail.getProduct().getPrice() *
+                    cartDetail.getQuantity());
+            // Tăng số lượng sản phẩm đã bán ~ ++ sold (Product)
+            cartDetail.getProduct().setSold(cartDetail.getProduct().getSold() +
+                    cartDetail.getQuantity());
+            orderDetail.setOrder(order);
+            orderDetails.add(orderDetail);
+        }
+
+        order.setOrderDetails(orderDetails);
+        orderRepository.save(order);
+
+        cart.removeAllCartDetail();
+        managedUser.removeCart();
+        cart.setUser(null);
+        cartRepository.deleteById(cart.getId());
+
+        session.setAttribute("sum", 0);
+        return String.valueOf(order.getId());
     }
 }

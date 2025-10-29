@@ -55,6 +55,10 @@ public class Cart {
         --sum;
     }
 
+    public void removeAllCartDetail() {
+        cartDetails.clear();
+    }
+
     public Long getId() {
         return id;
     }

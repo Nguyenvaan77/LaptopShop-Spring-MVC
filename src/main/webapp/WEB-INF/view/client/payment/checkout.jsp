@@ -157,6 +157,13 @@
                                                             path="cartDetails[${status.index}].quantity"/>
                                             </c:forEach>
                                             
+                                            <div class="form-floating mb-3">
+                                                <input class="form-control" 
+                                                            type="number" 
+                                                            name = "totalPayment"
+                                                            value="${totalPayment}"/>
+                                            </div>
+                                            
                                         </div>
                                         <button class="btn btn-primary btn-success border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit">Confirm order</button>
                                         
