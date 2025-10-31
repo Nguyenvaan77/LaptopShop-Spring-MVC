@@ -74,7 +74,11 @@ public class ProductService {
         }
     }
 
-    public void handleProductToCart(HttpSession session, String gmailUser, Long productId) {
+    public long countProduct() {
+        return productRepository.count();
+    }
+
+    public void handleProductToCart(HttpSession session, String gmailUser, Long productId, Long quantityToAdd) {
         User user = userRepository.findByEmail(gmailUser);
         Cart cart = cartRepository.findByUser(user);
         Product product = productRepository.findById(productId).orElse(null);
@@ -87,7 +91,7 @@ public class ProductService {
 
             CartDetail newCartDetail = new CartDetail();
             newCartDetail.setCart(newCart);
-            newCartDetail.setQuantity(1L);
+            newCartDetail.setQuantity(quantityToAdd);
             newCartDetail.setProduct(product);
 
             newCart.addCartDetail(newCartDetail);
@@ -100,7 +104,7 @@ public class ProductService {
         if (existCartDetail == null) {
             CartDetail newCartDetail = new CartDetail();
             newCartDetail.setProduct(product);
-            newCartDetail.setQuantity(1L);
+            newCartDetail.setQuantity(quantityToAdd);
             newCartDetail.setCart(cart);
             cart.addCartDetail(newCartDetail);
             cartDetailRepository.save(newCartDetail);
@@ -108,7 +112,7 @@ public class ProductService {
             return;
         }
 
-        existCartDetail.setQuantity(existCartDetail.getQuantity() + 1);
+        existCartDetail.setQuantity(existCartDetail.getQuantity() + quantityToAdd);
         cartDetailRepository.save(existCartDetail);
     }
 

@@ -13,20 +13,30 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.Product;
+import com.basis.anhangda37.service.OrderDetailService;
+import com.basis.anhangda37.service.OrderService;
 import com.basis.anhangda37.service.ProductService;
 import com.basis.anhangda37.service.UploadService;
 
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Controller
 public class ProductController {
     private final ProductService productService;
     private final UploadService uploadService;
+    private final OrderService orderService;
+    private final OrderDetailService orderDetailService;
 
-    public ProductController(ProductService productService, UploadService uploadService) {
+    public ProductController(ProductService productService, UploadService uploadService, OrderService orderService,
+            OrderDetailService orderDetailService) {
         this.productService = productService;
         this.uploadService = uploadService;
+        this.orderService = orderService;
+        this.orderDetailService = orderDetailService;
     }
 
     @GetMapping("/admin/product")
@@ -121,4 +131,7 @@ public class ProductController {
         productService.deleteProductById(product.getId());
         return "redirect:/admin/product";
     }
+    
+
+    
 }

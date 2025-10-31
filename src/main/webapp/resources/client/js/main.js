@@ -218,6 +218,52 @@
     }
 });
 
+$('.quantity.onProductDetail button').on('click', function () {
+    let change = 0;
+
+    const button = $(this);
+    const input = button.parent().parent().find('input');
+    const oldValue = parseFloat(input.val());
+    const quantityInStock = input.attr("product-quantity-in-stock");
+
+    let newVal = oldValue;
+
+    if (button.hasClass('btn-plus')) {
+        if(newVal < quantityInStock) {
+            newVal = oldValue + 1;
+            change = 1; // tăng thì cộng vào tổng
+        }
+    } else {
+        if (oldValue > 1) {
+            newVal = oldValue - 1;
+            change = -1; // giảm thì trừ khỏi tổng
+        } else {
+            newVal = 1;
+        }
+    }
+
+    const plusBtn = button.parent().parent().find('.btn-plus');
+    const minusBtn = button.parent().parent().find('.btn-minus');
+
+    if(newVal >= quantityInStock) {
+        plusBtn.prop('disabled', true);
+    } else {
+        plusBtn.prop('disabled', false);
+    }
+
+    if(newVal < 2) {
+        minusBtn.prop('disabled', true);
+    } else {
+        minusBtn.prop('disabled', false);
+    }
+    
+
+    input.val(newVal);
+
+    const el = document.getElementById(`quantity`);
+    $(el).val(newVal);
+});
+
 // ---- Hàm format tiền tệ ----
 function formatCurrency(value) {
     const formatter = new Intl.NumberFormat('vi-VN', {

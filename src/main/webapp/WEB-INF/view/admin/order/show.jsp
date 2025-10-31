@@ -26,7 +26,51 @@
                             <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                             <li class="breadcrumb-item active">Orders</li>    
                         </ol>
-                        <div>Order</div>
+                        <div class="mt-5">
+                            <div class="col-12 mx-auto">
+                                <div class="d-flex justify-content-between">
+                                    <h3>
+                                        Table orders
+                                    </h3>
+                                </div>
+
+                                <hr/>
+                                <table class="table table-bordered">
+                                    <thead class="table-active">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">User Name</th>
+                                            <th scope="col">User address</th>
+                                            <th scope="col">User Phone</th>
+                                            <th scope="col">Total price</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Option</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <c:forEach var ="order" items = "${orders}">
+                                            <tr>
+                                                <th scope="row">${order.id}</th>
+                                                <td>${order.receiverName}</td>
+                                                <td>${order.receiverAddress}</td>
+                                                <td>${order.receiverPhone}</td>
+                                                <td>${order.totalPrice}</td>
+                                                <td>${order.status}</td>
+                                                <td>
+                                                    <div class="button">
+                                                    <a href="/admin/order/${order.id}" class = "btn btn-primary">Detail</a>
+                                                    <a href="/admin/order/update/${order.id}" class = "btn btn-warning">Update</a>
+                                                    <a href="/admin/order/delete/${order.id}" class = "btn btn-danger">Delete</a>
+                                                </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </main>
                 <jsp:include page="../layout/footer.jsp" />

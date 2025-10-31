@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import com.basis.anhangda37.domain.enums.OrderStatus;
+
 import jakarta.annotation.Generated;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +41,9 @@ public class Order {
 
     private String receiverPhone;
 
+    @Enumerated(value = EnumType.STRING)
+    private OrderStatus status = OrderStatus.PENDING;
+
     public Order() {
     }
     
@@ -47,9 +54,32 @@ public class Order {
         this.receiverAddress = receiverAddress;
         this.receiverName = receiverName;
         this.receiverPhone = receiverPhone;
+        this.status = OrderStatus.PENDING;
     }
 
-    
+    public void setStatus(OrderStatus orderStatus) {
+        this.status = orderStatus;
+    }
+
+    public void isShipping() {
+        this.status = OrderStatus.SHIPPING;
+    }
+
+    public void isSuccess() {
+        this.status = OrderStatus.SUCCESS;
+    }
+
+    public void isCancel() {
+        this.status = OrderStatus.CANCEL;
+    }
+
+    public void isPending() {
+        this.status = OrderStatus.PENDING;
+    }
+
+    public OrderStatus getStatus() {
+        return this.status;
+    }
     
     public String getReceiverName() {
         return receiverName;
