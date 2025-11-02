@@ -3,6 +3,8 @@ package com.basis.anhangda37.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.basis.anhangda37.domain.Cart;
@@ -65,5 +67,9 @@ public class UserService {
 
     public long countUser() {
         return userRepository.count();
+    }
+
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 }

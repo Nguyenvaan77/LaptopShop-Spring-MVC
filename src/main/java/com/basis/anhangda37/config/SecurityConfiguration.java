@@ -62,7 +62,7 @@ public class SecurityConfiguration {
                                 jakarta.servlet.DispatcherType.INCLUDE)
                         .permitAll()
 
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/client/**")
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/client/**", "/product/**", "/product")
                         .permitAll()
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")

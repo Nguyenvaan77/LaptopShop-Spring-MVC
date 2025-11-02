@@ -11,6 +11,9 @@ import java.util.List;
 import org.apache.catalina.realm.UserDatabaseRealm;
 import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 import org.hibernate.loader.ast.internal.MultiKeyLoadChunker;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -55,9 +58,14 @@ public class UserController {
     }
 
     @GetMapping(value = "/admin/user")
-    public String routeUserTable(Model model) {
-        List<User> users = userService.getAllUsers();
+    public String routeUserTable(Model model,
+                                    @RequestParam(name = "page", defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, 5);
+        Page<User> puser = userService.getAllUsers(pageable);
+        List<User> users = puser.getContent();
         model.addAttribute("users", users);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", puser.getTotalPages());
         return "admin/user/show";
     }
 

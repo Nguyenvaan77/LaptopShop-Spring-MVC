@@ -129,6 +129,31 @@
         })
     });
 
+    //Hàm ready giữ trạng thái các ô checkbox khi reload lại trang product
+    $(document).ready(function () {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/product') return; // 🔒 chỉ chạy ở /shop
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const factories = urlParams.get('factory')?.split(',') || [];
+        const targets = urlParams.get('target')?.split(',') || [];
+        const prices = urlParams.get('price')?.split(',') || [];
+        const sort = urlParams.get('sort');
+
+        factories.forEach(f => {
+            $(`#factoryFilter .form-check-input[value="${f}"]`).prop('checked', true);
+        });
+        targets.forEach(t => {
+            $(`#targetFilter .form-check-input[value="${t}"]`).prop('checked', true);
+        });
+        prices.forEach(p => {
+            $(`#priceFilter .form-check-input[value="${p}"]`).prop('checked', true);
+        });
+        if (sort) {
+            $(`input[name="radio-sort"][value="${sort}"]`).prop('checked', true);
+        }
+    });
+
 
 
     // // Product Quantity
@@ -218,6 +243,8 @@
     }
 });
 
+    
+
 $('.quantity.onProductDetail button').on('click', function () {
     let change = 0;
 
@@ -275,6 +302,48 @@ function formatCurrency(value) {
     formatted = formatted.replace(/\./g, ',');
     return formatted;
 }
+
+$('#btnFilter').click(function (event) {
+    event.preventDefault();
+
+    let factoryArr = [];
+    let targetArr = [];
+    let priceArr = [];
+
+    $("#factoryFilter .form-check-input:checked").each(function () {
+        factoryArr.push($(this).val());
+    });
+
+    $("#targetFilter .form-check-input:checked").each(function () {
+        targetArr.push($(this).val());
+    });
+
+    $("#priceFilter .form-check-input:checked").each(function () {
+        priceArr.push($(this).val());
+    });
+
+    let sortValue = $('input[name="radio-sort"]:checked').val();
+
+    const currentUrl = new URL(window.location.href);
+    const searchParams = currentUrl.searchParams;
+
+    searchParams.set('page', '0');
+    searchParams.set('sort', sortValue);
+
+    if(factoryArr.length > 0) {
+        searchParams.set('factory', factoryArr.join(','));
+    }
+
+    if(targetArr.length > 0) {
+        searchParams.set('target', targetArr.join(','));
+    }
+
+    if(priceArr.length > 0) {
+        searchParams.set('price', priceArr.join(','));
+    }
+
+    window.location.href = currentUrl.toString();
+});
 
 
 

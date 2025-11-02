@@ -1,31 +1,51 @@
 package com.basis.anhangda37.service;
 
+import java.lang.classfile.constantpool.DoubleEntry;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.PrimitiveIterator;
+import java.util.Set;
 
 import javax.naming.NameNotFoundException;
+import javax.print.attribute.HashPrintServiceAttributeSet;
 
+import org.antlr.v4.runtime.misc.OrderedHashSet;
 import org.springframework.boot.autoconfigure.jms.JmsProperties.Listener.Session;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.basis.anhangda37.config.SecurityConfiguration;
+import com.basis.anhangda37.controller.admin.ProductController;
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.OrderDetail;
 import com.basis.anhangda37.domain.Product;
+import com.basis.anhangda37.domain.Product_;
 import com.basis.anhangda37.domain.User;
+import com.basis.anhangda37.domain.dto.ProductCriteriaDto;
 import com.basis.anhangda37.repository.CartDetailRepository;
 import com.basis.anhangda37.repository.CartRepository;
 import com.basis.anhangda37.repository.OrderDetailRepository;
 import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.repository.ProductRepository;
 import com.basis.anhangda37.repository.UserRepository;
+import com.basis.anhangda37.service.specification.ProductSpec;
 
 import jakarta.servlet.http.HttpSession;
 
 @Service
 public class ProductService {
+
+    private final SecurityConfiguration securityConfiguration;
 
     private final CartService cartService;
 
@@ -39,7 +59,8 @@ public class ProductService {
 
     public ProductService(UserRepository userRepository, ProductRepository productRepository,
             CartRepository cartRepository, CartDetailRepository cartDetailRepository, OrderRepository orderRepository,
-            OrderDetailRepository orderDetailRepository, CartDetailService cartDetailService, CartService cartService) {
+            OrderDetailRepository orderDetailRepository, CartDetailService cartDetailService, CartService cartService,
+            SecurityConfiguration securityConfiguration) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
@@ -48,6 +69,7 @@ public class ProductService {
         this.orderRepository = orderRepository;
         this.cartDetailService = cartDetailService;
         this.cartService = cartService;
+        this.securityConfiguration = securityConfiguration;
     }
 
     public Product getProductById(Long id) {
@@ -56,6 +78,14 @@ public class ProductService {
 
     public List<Product> getAllProduct() {
         return productRepository.findAll();
+    }
+
+    public Page<Product> getAllProduct(Pageable pageable) {
+        return productRepository.findAll(pageable);
+    }
+
+    public Page<Product> getAllProduct(String name, Pageable pageable) {
+        return productRepository.findAll(ProductSpec.nameLike(name), pageable);
     }
 
     public void deleteProductById(Long id) {
@@ -123,6 +153,82 @@ public class ProductService {
         return handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
     }
 
+    // Phương thức lọc cho tìm kiếm
+    public Page<Product> getAllProductsByNameFilter(String name, Pageable page) {
+        return productRepository.findAll(ProductSpec.nameLike(name), page);
+    }
+
+    public Page<Product> getAllProductsByListFactoryFilter(List<String> listFactorys, Pageable page) {
+        return productRepository.findAll(ProductSpec.belongListFactory(listFactorys), page);
+    }
+
+    public Page<Product> getAllProductsByRangePriceFilter(String rangePriceString, Pageable page) {
+        Double minPrice = this.getMinPriceFromRangeString(rangePriceString);
+        Double maxPrice = this.getMaxPriceFromRangeString(rangePriceString);
+
+        return productRepository.findAll(ProductSpec.rangePrice(minPrice, maxPrice), page);
+    }
+
+    public Page<Product> getAllProductsByListRangePriceFilter(List<String> listRangePriceString, Pageable page) {
+        List<Double[]> listPriceThreshold = handlePriceThreshold(listRangePriceString);
+        return productRepository.findAll(ProductSpec.listRangePrice(listPriceThreshold), page);
+    }
+
+    public Page<Product> fetchProductWithSpecification(Pageable page, ProductCriteriaDto productCriteriaDto) {
+        Specification<Product> combinedSpec = Specification.allOf();
+
+        if (productCriteriaDto.getFactory() != null && productCriteriaDto.getFactory().isPresent()) {
+            Specification<Product> currentSpecs = ProductSpec.belongListFactory(productCriteriaDto.getFactory().get());
+            combinedSpec = combinedSpec.and(currentSpecs);
+        }
+
+        if (productCriteriaDto.getTarget() != null && productCriteriaDto.getTarget().isPresent()) {
+            Specification<Product> currentSpecs = ProductSpec.belongListTarget(productCriteriaDto.getTarget().get());
+            combinedSpec = combinedSpec.and(currentSpecs);
+        }
+
+        if (productCriteriaDto.getPrice() != null && productCriteriaDto.getPrice().isPresent()) {
+            Specification<Product> currentSpecs = ProductSpec
+                    .listRangePrice(handlePriceThreshold(productCriteriaDto.getPrice().get()));
+            combinedSpec = combinedSpec.and(currentSpecs);
+        }
+
+        if (productCriteriaDto.getSort() == null
+                || (!productCriteriaDto.getSort().isPresent() || productCriteriaDto.getSort().get().equals("khong"))) {
+            return this.productRepository.findAll(combinedSpec, page);
+        } else {
+            String sortString = productCriteriaDto.getSort().get();
+            Sort sort;
+            if (sortString.equals("tang-dan")) {
+                sort = Sort.by(Sort.Direction.ASC, "price");
+            } else {
+                sort = Sort.by(Sort.Direction.DESC, "price");
+            }
+            Pageable sortedPageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
+            return this.productRepository.findAll(combinedSpec, sortedPageable);
+        }
+    }
+
+    /*
+     * Đầu vào là chuỗi "10-toi-15-trieu"
+     * Split dựa trên kí tự "-"
+     * Chuỗi trả về có dạng String[] = {"10", "toi", "15", "trieu"}
+     * Kết quả: min là String[0]="10", max là String [2] ="15"
+     */
+    private String[] handleRangePrice(String rangePriceString) {
+        return rangePriceString.split("-");
+    }
+
+    private Double getMinPriceFromRangeString(String rangePriceString) {
+        return Double.parseDouble(handleRangePrice(rangePriceString)[0]);
+    }
+
+    private Double getMaxPriceFromRangeString(String rangePriceString) {
+        return Double.parseDouble(handleRangePrice(rangePriceString)[2]);
+    }
+
+    // Hết
+
     private void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
         if (cartDetails == null || cartDetails.isEmpty()) {
             return;
@@ -140,6 +246,7 @@ public class ProductService {
     }
 
     private String handlePlaceOrder(String email, HttpSession session, String receiverName, String receiverAddress,
+
             String receiverPhone, Double totalPayment) {
         // User user = userRepository.findByEmail(email);
         // Cart cart = user.getCart();
@@ -187,4 +294,18 @@ public class ProductService {
         session.setAttribute("sum", 0);
         return String.valueOf(order.getId());
     }
+
+    private List<Double[]> handlePriceThreshold(List<String> listRangePriceString) {
+        List<Double[]> listPriceThreshold = new ArrayList<>();
+
+        listRangePriceString.forEach(item -> {
+            Double[] foo = new Double[2];
+            foo[0] = this.getMinPriceFromRangeString(item);
+            foo[1] = this.getMaxPriceFromRangeString(item);
+            listPriceThreshold.add(foo);
+        });
+
+        return listPriceThreshold;
+    }
+
 }

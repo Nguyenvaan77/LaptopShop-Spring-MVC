@@ -3,6 +3,8 @@ package com.basis.anhangda37.service;
 import java.util.List;
 
 import org.antlr.v4.runtime.atn.OrderedATNConfigSet;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.jaxb.SpringDataJaxb.OrderDto;
 import org.springframework.stereotype.Service;
 import com.basis.anhangda37.controller.admin.OrderController;
@@ -31,6 +33,10 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    public Page<Order> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable);
+    }
+
     public Order getOrderById(Long id) {
         return orderRepository.findById(id).get();
     }
@@ -49,4 +55,6 @@ public class OrderService {
     public long countOrder() {
         return orderRepository.count();
     }
+
+
 }
