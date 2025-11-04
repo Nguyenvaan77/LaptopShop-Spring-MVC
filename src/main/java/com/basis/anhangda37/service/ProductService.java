@@ -1,20 +1,8 @@
 package com.basis.anhangda37.service;
 
-import java.lang.classfile.constantpool.DoubleEntry;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.PrimitiveIterator;
-import java.util.Set;
 
-import javax.naming.NameNotFoundException;
-import javax.print.attribute.HashPrintServiceAttributeSet;
-
-import org.antlr.v4.runtime.misc.OrderedHashSet;
-import org.springframework.boot.autoconfigure.jms.JmsProperties.Listener.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,13 +11,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.basis.anhangda37.config.SecurityConfiguration;
-import com.basis.anhangda37.controller.admin.ProductController;
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.OrderDetail;
 import com.basis.anhangda37.domain.Product;
-import com.basis.anhangda37.domain.Product_;
 import com.basis.anhangda37.domain.User;
 import com.basis.anhangda37.domain.dto.ProductCriteriaDto;
 import com.basis.anhangda37.repository.CartDetailRepository;
