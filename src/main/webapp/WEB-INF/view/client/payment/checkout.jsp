@@ -95,8 +95,38 @@
                         <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
                         <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
                     </div>
-                    <form:form action = "/confirm-order" method = "post" modelAttribute="cart">
+                    <form:form action = "/payment/create" method = "post" modelAttribute="cart">
+                        <div style="display: none;">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="amount" 
+                                            type="number" 
+                                            value="10000"
+                                            name = "amount"/>
+                                <label for="amount" class="form-label">Customer name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="bankCode" 
+                                            type="text" 
+                                            value="NCB"
+                                            name = "bankCode"/>
+                                <label for="bankCode" class="form-label">Customer name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="orderId" 
+                                            type="text" 
+                                            value="48"
+                                            name = "orderId"/>
+                                <label for="orderId" class="form-label">Customer name</label>
+                            </div>
+                        </div>
+
                         <div>
+
                             <div class="form-floating mb-3">
                                 <input class="form-control" 
                                             id="inputName" 

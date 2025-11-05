@@ -136,7 +136,8 @@ public class ProductService {
     public String handleCheckOut(String email, HttpSession session, String receiverName, String receiverAddress,
             String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
         handleProductBeforeCheckout(cartDetails);
-        return handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
+        String orderCode = handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
+        return orderCode;
     }
 
     // Phương thức lọc cho tìm kiếm

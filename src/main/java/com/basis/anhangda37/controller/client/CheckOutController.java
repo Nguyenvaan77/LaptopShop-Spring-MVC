@@ -48,7 +48,8 @@ public class CheckOutController {
     private final CartDetailService cartDetailService;
 
     public CheckOutController(ProductService productService, UserService userService, CartService cartService,
-            CartDetailService cartDetailService, CartDetailRepository cartDetailRepository, AuthController authController) {
+            CartDetailService cartDetailService, CartDetailRepository cartDetailRepository,
+            AuthController authController) {
         this.productService = productService;
         this.userService = userService;
         this.cartService = cartService;
@@ -69,7 +70,7 @@ public class CheckOutController {
 
     @PostMapping("/confirm-checkout")
     public String postCheckOut(@ModelAttribute("cart") Cart cart,
-                                Model model) {
+            Model model) {
         List<CartDetail> cartDetails = cart.getCartDetails();
         for (CartDetail cartDetail : cartDetails) {
             cartDetail.setProduct(cartDetailService.getCartDetailById(cartDetail.getId()).get().getProduct());
@@ -86,18 +87,28 @@ public class CheckOutController {
 
     @PostMapping("/confirm-order")
     public String postConfirmOrder(HttpServletRequest request,
-                                    @RequestParam("customerName") String name,
-                                   @RequestParam("customerAddress") String address,
-                                   @RequestParam("customerPhone") String phone,
-                                   @RequestParam("totalPayment") Double totalPayment,
-                                   @ModelAttribute("cart") Cart cart,
-                                   Model model
-                                   ) {
-    HttpSession session = request.getSession();
-    String email = ((String)session.getAttribute("email"));
-    List<CartDetail> cartDetails = cart.getCartDetails();
-    String orderCode = productService.handleCheckOut(email, session, name, address, phone, totalPayment, cartDetails);
-    model.addAttribute("orderCode", orderCode);
-    return "client/cart/thanks";
+            @RequestParam("customerName") String name,
+            @RequestParam("customerAddress") String address,
+            @RequestParam("customerPhone") String phone,
+            @RequestParam("totalPayment") Double totalPayment,
+            @ModelAttribute("cart") Cart cart,
+            Model model) {
+        HttpSession session = request.getSession();
+        String email = ((String) session.getAttribute("email"));
+        List<CartDetail> cartDetails = cart.getCartDetails();
+        String orderCode = productService.handleCheckOut(email, session, name, address, phone, totalPayment,
+                cartDetails);
+        model.addAttribute("orderCode", orderCode);
+        return "client/cart/thanks";
+    }
+
+    @GetMapping("/order/{id}/{status}")
+    public String getSuccessCheckOutPage(@PathVariable("id") Long id, @PathVariable("status") String status,
+            Model model) {
+        if (status.equals("success")) {
+            model.addAttribute("orderCode", id);
+        }
+        ;
+        return "client/cart/thanks";
     }
 }
