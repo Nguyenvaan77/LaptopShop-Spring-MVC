@@ -119,7 +119,7 @@
                                 <input class="form-control" 
                                             id="orderId" 
                                             type="text" 
-                                            value="48"
+                                            value="72"
                                             name = "orderId"/>
                                 <label for="orderId" class="form-label">Customer name</label>
                             </div>

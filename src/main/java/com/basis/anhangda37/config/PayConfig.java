@@ -2,6 +2,7 @@
 package com.basis.anhangda37.config;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,7 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class PayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8082/order/{id}/{status}";
+    public static String vnp_ReturnUrl = "http://localhost:8082/payment/vnpay-return";
     public static String vnp_TmnCode = "31KZJPRD";
     public static String secretKey = "WYQTZ763Y7RUMXHL4HYHBC15N5826QP2";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
@@ -72,6 +73,27 @@ public class PayConfig {
         while (itr.hasNext()) {
             String fieldName = (String) itr.next();
             String fieldValue = (String) fields.get(fieldName);
+
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                sb.append(fieldName);
+                sb.append("=");
+                sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+            }
+            if (itr.hasNext()) {
+                sb.append("&");
+            }
+        }
+        return hmacSHA512(secretKey, sb.toString());
+    }
+
+    public static String getQueryString(Map fields) {
+        List fieldNames = new ArrayList(fields.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder sb = new StringBuilder();
+        Iterator itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = (String) itr.next();
+            String fieldValue = (String) fields.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 sb.append(fieldName);
                 sb.append("=");
@@ -81,7 +103,7 @@ public class PayConfig {
                 sb.append("&");
             }
         }
-        return hmacSHA512(secretKey, sb.toString());
+        return sb.toString();
     }
 
     public static String hmacSHA512(final String key, final String data) {

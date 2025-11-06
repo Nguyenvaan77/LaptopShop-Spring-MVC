@@ -22,15 +22,14 @@ import com.basis.anhangda37.service.OrderDetailService;
 import com.basis.anhangda37.service.OrderService;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
-public class OrderController {
+public class OrderDashboardController {
 
     private final OrderService orderService;
     private final OrderDetailService orderDetailService;
 
-    public OrderController(OrderService orderService, OrderDetailService orderDetailService) {
+    public OrderDashboardController(OrderService orderService, OrderDetailService orderDetailService) {
         this.orderService = orderService;
         this.orderDetailService = orderDetailService;
     }

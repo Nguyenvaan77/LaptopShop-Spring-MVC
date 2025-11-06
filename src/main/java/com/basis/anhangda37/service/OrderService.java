@@ -51,17 +51,9 @@ public class OrderService {
     public OrderResponseDto book(String email, HttpSession session, String receiverName, String receiverAddress,
                 String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
 
-            OrderResponseDto orderResponseDto = new OrderResponseDto();
-            handleProductBeforeCheckout(cartDetails);
-            String orderCode = handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
-            Order order = orderRepository.findById(Long.parseLong(orderCode)).get();
-            
-            PaymentResponseDto paymentResponseDto = vnPayService.initPayment(null);
-            
-            orderResponseDto.setOrder(order);
-            orderResponseDto.setPaymentResponse(paymentResponseDto);
+           
 
-            return orderResponseDto;
+            return null;
     }
 
     public List<Order> getAllOrdersByUser(User user) {

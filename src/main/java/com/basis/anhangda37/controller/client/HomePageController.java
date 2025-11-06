@@ -46,7 +46,6 @@ public class HomePageController {
         List<Product> products = productService.getAllProduct();
         model.addAttribute("products", products);
         return "client/homepage/show";
-
     }
 
     @GetMapping("/access-deny")
