@@ -23,8 +23,8 @@ public class OrderRequestDto {
     @NumberFormat
     private Double totalPayment;
 
-    @NotNull
-    private Cart cart;
+    // @NotNull
+    // private Cart cart;
 
     @NotNull
     private String bankCode;
@@ -63,6 +63,31 @@ public class OrderRequestDto {
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
+    public String getCustomerName() {
+        return customerName;
+    }
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+    public String getCustomerAddress() {
+        return customerAddress;
+    }
+    public void setCustomerAddress(String customerAddress) {
+        this.customerAddress = customerAddress;
+    }
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+    // public Cart getCart() {
+    //     return cart;
+    // }
+    // public void setCart(Cart cart) {
+    //     this.cart = cart;
+    // }
+    
 
     
 }

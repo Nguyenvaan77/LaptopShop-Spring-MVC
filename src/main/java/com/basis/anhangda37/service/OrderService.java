@@ -1,18 +1,24 @@
 package com.basis.anhangda37.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.v4.runtime.atn.OrderedATNConfigSet;
+import org.hibernate.engine.spi.PrimeAmongSecondarySupertypes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.jaxb.SpringDataJaxb.OrderDto;
 import org.springframework.stereotype.Service;
+
+import com.basis.anhangda37.config.PayConfig;
 import com.basis.anhangda37.controller.admin.OrderDashboardController;
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.OrderDetail;
+import com.basis.anhangda37.domain.Payment;
 import com.basis.anhangda37.domain.Product;
 import com.basis.anhangda37.domain.User;
 import com.basis.anhangda37.domain.dto.OrderDetailToShowDto;
@@ -21,13 +27,18 @@ import com.basis.anhangda37.domain.dto.OrderResponseDto;
 import com.basis.anhangda37.domain.dto.OrderToShowDto;
 import com.basis.anhangda37.domain.dto.PaymentResponseDto;
 import com.basis.anhangda37.domain.enums.OrderStatus;
+import com.basis.anhangda37.domain.enums.PaymentStatus;
 import com.basis.anhangda37.repository.CartDetailRepository;
 import com.basis.anhangda37.repository.CartRepository;
 import com.basis.anhangda37.repository.OrderRepository;
+import com.basis.anhangda37.repository.PaymentRepository;
 import com.basis.anhangda37.repository.ProductRepository;
 import com.basis.anhangda37.repository.UserRepository;
+import com.basis.anhangda37.service.interf.PaymentService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 @Service
 public class OrderService {
@@ -36,26 +47,148 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
+    private final PaymentRepository paymentRepository;
 
     private final VnPayService vnPayService;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
             ProductRepository productRepository, UserRepository userRepository, CartRepository cartRepository,
-            VnPayService vnPayService) {
+            PaymentRepository paymentRepository, VnPayService vnPayService) {
         this.orderRepository = orderRepository;
         this.cartDetailRepository = cartDetailRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.cartRepository = cartRepository;
+        this.paymentRepository = paymentRepository;
         this.vnPayService = vnPayService;
     }
 
-    public OrderResponseDto book(String email, HttpSession session, String receiverName, String receiverAddress,
-            String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
+    @Transactional
+    public String checkOrderStatus(Long orderId, String ipAddress) {
+        Order order;
+        try {
+            order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Order với ID: " + orderId));
+        } catch (Exception e) {
+            // Nếu không tìm thấy Order ID
+            return PayConfig.REDIRECT_FAILED_URL + "0"; // Trả về trang thất bại chung
+        }
+
+        Payment payment = order.getPayment();
+        if (payment == null || payment.getVnpTxnRef() == null || payment.getCreatedAt() == null) {
+            // Đơn hàng không có thông tin thanh toán -> Lỗi
+            return PayConfig.REDIRECT_FAILED_URL + orderId;
+        }
+
+        // 1. Gọi VNPAY Service để truy vấn
+        Map<String, Object> vnpayResponse;
+        try {
+            vnpayResponse = vnPayService.queryTransaction(
+                payment.getVnpTxnRef(),
+                payment.getCreatedAt(),
+                ipAddress
+            );
+        } catch (Exception e) {
+            // Lỗi khi gọi VNPAY (vd: timeout, sai chữ ký)
+            System.err.println("Lỗi VNPAY Query: " + e.getMessage());
+            // Tạm trả về trang pending, vì chúng ta chưa biết chắc trạng thái
+            return PayConfig.REDIRECT_PENDING_URL + orderId;
+        }
         
+        // 2. Phân tích kết quả
+        String vnp_ResponseCode = (String) vnpayResponse.get("vnp_ResponseCode");
+        String vnp_TransactionStatus = (String) vnpayResponse.get("vnp_TransactionStatus");
+
+        // Kiểm tra xem lệnh QueryDr có thành công không
+        if (!"00".equals(vnp_ResponseCode)) {
+            // Lỗi từ VNPAY (vd: 91: Không tìm thấy giao dịch)
+            String message = (String) vnpayResponse.get("vnp_Message");
+            System.err.println("Lỗi VNPAY Query (vnp_ResponseCode != 00): " + message);
+            
+            // Không tìm thấy giao dịch -> coi như thất bại
+            return PayConfig.REDIRECT_FAILED_URL + orderId;
+        }
+
+        // 3. Cập nhật trạng thái Payment và Order dựa trên vnp_TransactionStatus
+        // và quyết định URL redirect
+        String redirectUrl;
+        
+        switch (vnp_TransactionStatus) {
+            case "00": // Giao dịch thanh toán thành công
+                payment.setStatus(PaymentStatus.SUCCESS);
+                order.setStatus(OrderStatus.SHIPPING); // Hoặc PAID, SUCCESS tùy logic
+                redirectUrl = PayConfig.REDIRECT_SUCCESS_URL + orderId;
+                break;
+            
+            case "01": // Giao dịch chưa hoàn tất
+                payment.setStatus(PaymentStatus.PENDING);
+                order.setStatus(OrderStatus.PENDING);
+                redirectUrl = PayConfig.REDIRECT_PENDING_URL + orderId;
+                break;
+            
+            default: // 02, 04, 05, 06, 07, 09... -> Giao dịch lỗi/bị từ chối/hoàn
+                payment.setStatus(PaymentStatus.FAIL);
+                order.setStatus(OrderStatus.CANCEL);
+                redirectUrl = PayConfig.REDIRECT_FAILED_URL + orderId;
+                break;
+        }
+
+        // 4. Lưu thay đổi vào CSDL
+        paymentRepository.save(payment);
+        orderRepository.save(order);
+        
+        // 5. Trả về URL
+        return redirectUrl;
+    }
+
+    @Transactional
+    public OrderResponseDto book(HttpServletRequest request, OrderRequestDto orderRequestDto,
+            List<CartDetail> cartDetails) {
+        HttpSession session = request.getSession();
+        OrderResponseDto dto = new OrderResponseDto();
+
         handleProductBeforeCheckout(cartDetails);
-        String orderCode = handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
-        return null;
+        Long orderCode = handlePlaceOrder(session, orderRequestDto.getCustomerName(),
+                orderRequestDto.getCustomerAddress(), orderRequestDto.getCustomerPhone(),
+                orderRequestDto.getTotalPayment());
+        String paymentUrl = vnPayService.initPayment(orderRequestDto);
+
+        /*
+         * TODO: Tạo và gán Payment cho Order
+         */
+
+        // 1. Lấy lại Order vừa được lưu (đang trong trạng thái managed)
+        Order order = orderRepository.findById(orderCode)
+                .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy Order vừa tạo. ID: " + orderCode));
+
+        // 2. Trích xuất thông tin từ paymentUrl bằng các hàm helper
+        String vnpTxnRef = VnPayService.getTxnRefFromUrl(paymentUrl);
+        Long amountVnp = VnPayService.getAmountFromUrl(paymentUrl);
+        LocalDateTime createDate = VnPayService.getCreateDateFromUrl(paymentUrl);
+
+        // 3. Tạo đối tượng Payment
+        Payment payment = new Payment();
+        payment.setMethod("VNPAY"); // Phương thức thanh toán
+        payment.setBankCode(orderRequestDto.getBankCode());
+        payment.setAmount(amountVnp); // Số tiền (đã * 100)
+        payment.setVnpTxnRef(vnpTxnRef); // Mã giao dịch VNPAY
+        payment.setCreatedAt(createDate); // Thời gian tạo
+        payment.setStatus(PaymentStatus.PENDING); // Trạng thái: Chờ thanh toán
+
+        // 4. Thiết lập quan hệ hai chiều (Bidirectional relationship)
+        payment.setOrder(order);
+        order.setPayment(payment);
+
+        // 5. Lưu lại
+        // Do hàm book() là @Transactional và Order có cascade = CascadeType.ALL
+        // nên khi ta lưu order, payment cũng sẽ tự động được lưu.
+        orderRepository.save(order);
+
+        // KẾT THÚC PHẦN TODO
+
+        dto.setOrderId(orderCode);
+        dto.setPaymentResponse(new PaymentResponseDto(paymentUrl, VnPayService.getReturnUrl(paymentUrl)));
+        return dto;
     }
 
     public List<Order> getAllOrdersByUser(User user) {
@@ -105,7 +238,7 @@ public class OrderService {
         }
     }
 
-    private String handlePlaceOrder(String email, HttpSession session, String receiverName, String receiverAddress,
+    private Long handlePlaceOrder(HttpSession session, String receiverName, String receiverAddress,
 
             String receiverPhone, Double totalPayment) {
         // User user = userRepository.findByEmail(email);
@@ -116,7 +249,7 @@ public class OrderService {
         // user.removeCart();
         // cart.setUser(null);
         // cartRepository.deleteById(cart.getId());
-
+        String email = (String) session.getAttribute("email");
         User managedUser = userRepository.findByEmail(email);
         Order order = new Order();
         order.setReceiverAddress(receiverAddress);
@@ -144,6 +277,7 @@ public class OrderService {
         }
 
         order.setOrderDetails(orderDetails);
+
         orderRepository.save(order);
 
         cart.removeAllCartDetail();
@@ -152,6 +286,6 @@ public class OrderService {
         cartRepository.deleteById(cart.getId());
 
         session.setAttribute("sum", 0);
-        return String.valueOf(order.getId());
+        return order.getId();
     }
 }
