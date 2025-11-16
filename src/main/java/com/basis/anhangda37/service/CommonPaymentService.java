@@ -14,12 +14,11 @@ public class CommonPaymentService {
     }
 
     public Payment getPaymentByTxn_Ref(String txnRef) {
-        return paymentRepository.findByVnp_TxnRef(txnRef).get();
+        return paymentRepository.findByVnpTxnRef(txnRef).get();
     }
 
     public PaymentRepository getPaymentRepository() {
         return paymentRepository;
     }
 
-    
 }

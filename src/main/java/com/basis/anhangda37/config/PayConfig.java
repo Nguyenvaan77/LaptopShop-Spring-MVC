@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,11 +23,16 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class PayConfig {
 
+    public static final DateTimeFormatter VNPAY_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_ReturnUrl = "http://localhost:8082/order/payment/vnpay-return";
     public static String vnp_TmnCode = "31KZJPRD";
     public static String secretKey = "WYQTZ763Y7RUMXHL4HYHBC15N5826QP2";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+
+    public static final String REDIRECT_SUCCESS_URL = "/order/payment/success?orderId=";
+    public static final String REDIRECT_FAILED_URL = "/order/payment/failed?orderId=";
+    public static final String REDIRECT_PENDING_URL = "/order/payment/pending?orderId=";
 
     public static String md5(String message) {
         String digest = null;

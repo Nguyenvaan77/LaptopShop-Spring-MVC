@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.UniqueElements;
 
 import com.basis.anhangda37.domain.enums.PaymentStatus;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,8 +35,8 @@ public class Payment {
 
     private Long amount;
 
-    @UniqueElements
-    private String vnp_TxnRef;
+    @Column(unique = true)
+    private String vnpTxnRef;
 
     private LocalDateTime createdAt;
 
@@ -112,12 +113,12 @@ public class Payment {
         this.status = status;
     }
 
-    public String getVnp_TxnRef() {
-        return vnp_TxnRef;
+    public String getVnpTxnRef() {
+        return vnpTxnRef;
     }
 
-    public void setVnp_TxnRef(String vnp_TxnRef) {
-        this.vnp_TxnRef = vnp_TxnRef;
+    public void setVnpTxnRef(String vnp_TxnRef) {
+        this.vnpTxnRef = vnp_TxnRef;
     }
 
 }
