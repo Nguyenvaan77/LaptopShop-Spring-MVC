@@ -1,23 +1,19 @@
 package com.basis.anhangda37.controller.admin;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.tags.shaded.org.apache.regexp.recompile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.LobRetrievalFailureException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import com.basis.anhangda37.controller.client.HomePageController;
 import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.OrderDetail;
 import com.basis.anhangda37.domain.dto.OrderDetailToShowDto;
-import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.service.OrderDetailService;
 import com.basis.anhangda37.service.OrderService;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class OrderDashboardController {
+
+    @Value("${admin.dashboard.size.order}")
+    private int pageSizeOfOrderDashboard;
 
     private final OrderService orderService;
     private final OrderDetailService orderDetailService;
@@ -35,9 +34,9 @@ public class OrderDashboardController {
     }
 
     @GetMapping("/admin/order")
-    public String getDashboard(Model model,
+    public String getOrderDashboard(Model model,
             @RequestParam(name = "page", defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, pageSizeOfOrderDashboard);
         Page<Order> porders = orderService.getAllOrders(pageable);
         List<Order> orders = porders.getContent();
         model.addAttribute("orders", orders);

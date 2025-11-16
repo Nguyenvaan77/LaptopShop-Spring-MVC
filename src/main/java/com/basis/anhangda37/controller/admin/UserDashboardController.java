@@ -2,6 +2,7 @@ package com.basis.anhangda37.controller.admin;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class UserDashboardController {
+    @Value("${admin.dashboard.size.user}")
+    private int pageSizeOfUserDashboard;
 
     private final UserService userService;
     private final UploadService uploadService;
@@ -42,7 +45,7 @@ public class UserDashboardController {
     @GetMapping(value = "/admin/user")
     public String routeUserTable(Model model,
             @RequestParam(name = "page", defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, pageSizeOfUserDashboard);
         Page<User> puser = userService.getAllUsers(pageable);
         List<User> users = puser.getContent();
         model.addAttribute("users", users);

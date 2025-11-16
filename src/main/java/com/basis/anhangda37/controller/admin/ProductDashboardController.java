@@ -2,6 +2,7 @@ package com.basis.anhangda37.controller.admin;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,9 @@ import jakarta.validation.Valid;
 
 @Controller
 public class ProductDashboardController {
+    @Value("${admin.dashboard.size.product}")
+    private int pageSizeOfProductDashboard;
+
     private final ProductService productService;
     private final UploadService uploadService;
 
@@ -35,7 +39,7 @@ public class ProductDashboardController {
     @GetMapping("/admin/product")
     public String getDashboard(Model model,
             @RequestParam(name = "page", defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, pageSizeOfProductDashboard);
         Page<Product> prs = productService.getAllProduct(pageable);
         List<Product> products = prs.getContent();
         model.addAttribute("products", products);

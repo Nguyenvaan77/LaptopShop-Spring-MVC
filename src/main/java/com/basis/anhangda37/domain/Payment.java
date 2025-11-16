@@ -1,13 +1,9 @@
 package com.basis.anhangda37.domain;
 
-import java.lang.classfile.constantpool.PoolEntry;
-import java.security.Timestamp;
+
 import java.time.LocalDateTime;
 
-import org.eclipse.tags.shaded.org.apache.regexp.recompile;
 import org.hibernate.validator.constraints.UniqueElements;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import com.basis.anhangda37.domain.enums.PaymentStatus;
 
@@ -20,7 +16,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "payment")
