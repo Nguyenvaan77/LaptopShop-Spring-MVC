@@ -15,67 +15,96 @@ import java.util.TimeZone;
 import org.springframework.stereotype.Service;
 
 import com.basis.anhangda37.config.PayConfig;
+import com.basis.anhangda37.domain.Payment;
 import com.basis.anhangda37.domain.dto.InitPaymentDto;
+import com.basis.anhangda37.domain.dto.OrderRequestDto;
 import com.basis.anhangda37.domain.dto.PaymentResponseDto;
+import com.basis.anhangda37.domain.enums.PaymentParam;
 import com.basis.anhangda37.service.interf.PaymentService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class VnPayService implements PaymentService {
-    public String initPayment(HttpServletRequest request, InitPaymentDto initPaymentDto) {
-        Long orderId = initPaymentDto.getOrderId();
-        String bankCode = initPaymentDto.getBankCode();
-        String language = initPaymentDto.getLanguage();
-        Long amount = initPaymentDto.getAmount();
 
-        String vnp_Version = "2.1.0";
-        String vnp_Command = "pay";
-        String orderType = "other";
+    public String initPayment(HttpServletRequest request, OrderRequestDto orderRequest) {
 
+        Long orderId = orderRequest.getOrderId();
+        String bankCode = orderRequest.getBankCode();
+        String language = orderRequest.getLanguage();
+        Long amount = orderRequest.getAmount();
+        String ipAddress = orderRequest.getIpAddress();
+
+        // Required values
+        String vnpVersion = "2.1.0";
+        String vnpCommand = "pay";
+        String vnpOrderType = "other";
         long amountVnp = amount * 100;
-        String vnp_TxnRef = String.valueOf(PayConfig.getRandomNumber(8));
-        String vnp_IpAddr = PayConfig.getIpAddress(request);
-        String vnp_TmnCode = PayConfig.vnp_TmnCode;
+
+        String vnpTxnRef = PayConfig.getRandomNumber(8);
+        String vnpIpAddr = ipAddress;
+        String vnpTmnCode = PayConfig.vnp_TmnCode;
 
         Map<String, String> vnp_Params = new HashMap<>();
-        vnp_Params.put("vnp_Version", vnp_Version);
-        vnp_Params.put("vnp_Command", vnp_Command);
-        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        vnp_Params.put("vnp_Amount", String.valueOf(amountVnp));
-        vnp_Params.put("vnp_CurrCode", "VND");
+        vnp_Params.put(PaymentParam.VNP_VERSION.value(), vnpVersion);
+        vnp_Params.put(PaymentParam.VNP_COMMAND.value(), vnpCommand);
+        vnp_Params.put(PaymentParam.VNP_TMNCODE.value(), vnpTmnCode);
+        vnp_Params.put(PaymentParam.VNP_AMOUNT.value(), String.valueOf(amountVnp));
+        vnp_Params.put(PaymentParam.VNP_CURRCODE.value(), "VND");
 
-        if (bankCode != null && !bankCode.isEmpty())
-            vnp_Params.put("vnp_BankCode", bankCode);
+        if (bankCode != null && !bankCode.isEmpty()) {
+            vnp_Params.put(PaymentParam.VNP_BANKCODE.value(), bankCode);
+        }
 
-        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
-        vnp_Params.put("vnp_OrderType", orderType);
-        vnp_Params.put("vnp_Locale", (language != null && !language.isEmpty()) ? language : "vn");
-        vnp_Params.put("vnp_ReturnUrl", buildReturnUrl(orderId, "success"));
-        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put(PaymentParam.VNP_TXNREF.value(), vnpTxnRef);
+        vnp_Params.put(PaymentParam.VNP_ORDERINFO.value(), "Thanh toan don hang: " + vnpTxnRef);
+        vnp_Params.put(PaymentParam.VNP_ORDERTYPE.value(), vnpOrderType);
+        vnp_Params.put(PaymentParam.VNP_LOCALE.value(),
+                (language != null && !language.isEmpty()) ? language : "vn");
 
+        vnp_Params.put(PaymentParam.VNP_RETURNURL.value(), buildReturnUrl(vnpTxnRef, "success"));
+        vnp_Params.put(PaymentParam.VNP_IPADDR.value(), vnpIpAddr);
+
+        // Generate datetime
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        String vnp_CreateDate = formatter.format(cld.getTime());
+
+        String vnpCreateDate = formatter.format(cld.getTime());
         cld.add(Calendar.MINUTE, 15);
-        String vnp_ExpireDate = formatter.format(cld.getTime());
+        String vnpExpireDate = formatter.format(cld.getTime());
 
-        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+        vnp_Params.put(PaymentParam.VNP_CREATDATE.value(), vnpCreateDate);
+        vnp_Params.put(PaymentParam.VNP_EXPIREDATE.value(), vnpExpireDate);
 
-        List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+        String queryString = buildInitPaymentUrl(vnp_Params);
+
+        // Build payment URL
+        return PayConfig.vnp_PayUrl + "?" + queryString;
+    }
+
+    public String buildInitPaymentUrl(Map<String, String> params) {
+        // Sort field names
+        List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
 
+        // Build hashData + query
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
+
         for (Iterator<String> itr = fieldNames.iterator(); itr.hasNext();) {
             String fieldName = itr.next();
-            String fieldValue = vnp_Params.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                hashData.append(fieldName).append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+            String fieldValue = params.get(fieldName);
+
+            if (fieldValue != null && !fieldValue.isEmpty()) {
+
+                hashData.append(fieldName)
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+
                 query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII))
-                        .append('=').append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+
                 if (itr.hasNext()) {
                     hashData.append('&');
                     query.append('&');
@@ -83,16 +112,21 @@ public class VnPayService implements PaymentService {
             }
         }
 
-        String vnp_SecureHash = PayConfig.hmacSHA512(PayConfig.secretKey, hashData.toString());
-        query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-        String paymentUrl = PayConfig.vnp_PayUrl + "?" + query;
+        // Generate secure hash
+        String secureHash = sign(hashData.toString());
+        
+        query.append("&").append(PaymentParam.VNP_SECUREHASH.value()).append("=").append(secureHash);
 
-        return paymentUrl;
+        return query.toString();
     }
 
-    private String buildReturnUrl(Long orderId, String statusRaw) {
+    private String sign(String data) {
+        return PayConfig.hmacSHA512(PayConfig.secretKey, data.toString());
+    } 
+
+    private String buildReturnUrl(String txnRef, String statusRaw) {
         String s = PayConfig.vnp_ReturnUrl;
-        return s.replace("{id}", String.valueOf(orderId))
+        return s.replace("{txnRef}", txnRef)
                 .replace("{status}", statusRaw);
     }
 }

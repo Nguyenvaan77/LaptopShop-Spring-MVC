@@ -102,13 +102,4 @@ public class CheckOutController {
         return "client/cart/thanks";
     }
 
-    @GetMapping("/order/{id}/{status}")
-    public String getSuccessCheckOutPage(@PathVariable("id") Long id, @PathVariable("status") String status,
-            Model model) {
-        if (status.equals("success")) {
-            model.addAttribute("orderCode", id);
-        }
-        ;
-        return "client/cart/thanks";
-    }
 }

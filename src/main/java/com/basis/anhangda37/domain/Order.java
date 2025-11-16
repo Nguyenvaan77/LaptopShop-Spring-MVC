@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -41,13 +42,17 @@ public class Order {
 
     private String receiverPhone;
 
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Payment payment;
+
     @Enumerated(value = EnumType.STRING)
     private OrderStatus status = OrderStatus.PENDING;
 
     public Order() {
     }
-    
-    public Order(Long id, User user, Double totalPrice, String receiverName, String receiverAddress, String receiverPhone) {
+
+    public Order(Long id, User user, Double totalPrice, String receiverName, String receiverAddress,
+            String receiverPhone) {
         this.id = id;
         this.user = user;
         this.totalPrice = totalPrice;
@@ -80,7 +85,7 @@ public class Order {
     public OrderStatus getStatus() {
         return this.status;
     }
-    
+
     public String getReceiverName() {
         return receiverName;
     }
@@ -108,12 +113,15 @@ public class Order {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public Double getTotalPrice() {
         return totalPrice;
     }
+
     public void setTotalPrice(Double totalPrice) {
         this.totalPrice = totalPrice;
     }
@@ -132,5 +140,13 @@ public class Order {
 
     public void setOrderDetails(List<OrderDetail> orderDetails) {
         this.orderDetails = orderDetails;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 }

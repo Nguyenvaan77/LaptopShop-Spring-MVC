@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.jaxb.SpringDataJaxb.OrderDto;
 import org.springframework.stereotype.Service;
-import com.basis.anhangda37.controller.admin.OrderController;
+import com.basis.anhangda37.controller.admin.OrderDashboardController;
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Order;
@@ -39,7 +39,9 @@ public class OrderService {
 
     private final VnPayService vnPayService;
 
-    public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository, ProductRepository productRepository, UserRepository userRepository, CartRepository cartRepository, VnPayService vnPayService) {
+    public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
+            ProductRepository productRepository, UserRepository userRepository, CartRepository cartRepository,
+            VnPayService vnPayService) {
         this.orderRepository = orderRepository;
         this.cartDetailRepository = cartDetailRepository;
         this.productRepository = productRepository;
@@ -49,11 +51,11 @@ public class OrderService {
     }
 
     public OrderResponseDto book(String email, HttpSession session, String receiverName, String receiverAddress,
-                String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
-
-           
-
-            return null;
+            String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
+        
+        handleProductBeforeCheckout(cartDetails);
+        String orderCode = handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
+        return null;
     }
 
     public List<Order> getAllOrdersByUser(User user) {
@@ -78,7 +80,7 @@ public class OrderService {
     }
 
     public void deleteById(Long id) {
-        if(orderRepository.existsById(id)) {
+        if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
         }
     }
@@ -87,7 +89,7 @@ public class OrderService {
         return orderRepository.count();
     }
 
-private void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
+    private void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
         if (cartDetails == null || cartDetails.isEmpty()) {
             return;
         }
