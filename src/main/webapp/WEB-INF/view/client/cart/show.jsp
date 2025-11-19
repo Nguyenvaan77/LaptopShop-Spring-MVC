@@ -137,6 +137,14 @@
                                 </div>
                                 <form:form action = "/confirm-checkout" method = "post" modelAttribute="cart">
                                     <input type="hidden" name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
+
+                                    <!-- <input type="hidden"
+                                            class="form-control" 
+                                            id="inputOrderId" 
+                                            type="number" 
+                                            name = "orderId"
+                                            value="${orderId}"/> -->
+                                    
                                     <div style= "display: none;">
                                         <c:forEach var = "cartDetail" items = "${cart.cartDetails}" varStatus = "status">
                                             <form:input class="form-control" 

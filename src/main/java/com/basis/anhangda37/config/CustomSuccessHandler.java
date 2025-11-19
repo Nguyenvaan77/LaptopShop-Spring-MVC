@@ -23,14 +23,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-public class CustomSuccessHandler implements AuthenticationSuccessHandler{
+public class CustomSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private UserService userService;
 
     @Autowired
     private CartService CartService;
 
-    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();  
+    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
     protected String determineTargetUrl(final Authentication authentication) {
         Map<String, String> roleTargetUrlMap = new HashMap<>();
@@ -40,9 +40,9 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
 
         final Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        for(final GrantedAuthority grantedAuthority : authorities) {   
+        for (final GrantedAuthority grantedAuthority : authorities) {
             String authorityName = grantedAuthority.getAuthority();
-            if(roleTargetUrlMap.containsKey(authorityName)) {
+            if (roleTargetUrlMap.containsKey(authorityName)) {
                 return roleTargetUrlMap.get(authorityName);
             }
         }
@@ -52,13 +52,13 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
 
     protected void clearAuthenticationAttributes(HttpServletRequest request, Authentication authentication) {
         HttpSession session = request.getSession(false);
-        if(session == null) {
+        if (session == null) {
             return;
         }
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
         String gmail = authentication.getName();
         User loginUser = userService.getUserByEmail(gmail);
-        if(loginUser != null) {
+        if (loginUser != null) {
             session.setAttribute("avatar", loginUser.getAvatar());
             session.setAttribute("fullName", loginUser.getFullName());
             session.setAttribute("email", loginUser.getEmail());
@@ -74,12 +74,12 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
             Authentication authentication) throws IOException, ServletException {
         String targetUrl = determineTargetUrl(authentication);
 
-        if(response.isCommitted()) {
+        if (response.isCommitted()) {
             return;
         }
 
         redirectStrategy.sendRedirect(request, response, targetUrl);
         clearAuthenticationAttributes(request, authentication);
     }
-    
+
 }

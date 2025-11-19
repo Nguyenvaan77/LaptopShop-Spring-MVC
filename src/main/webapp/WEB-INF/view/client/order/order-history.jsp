@@ -56,8 +56,12 @@
                         <tbody>
                             <c:forEach var = "order" items = "${orders}" varStatus = "status">
                                 <tr>
-                                    <td colspan="4">
+                                    <td >
                                         Order id = ${order.id}
+                                    </td>
+
+                                    <td colspan="3">
+                                        Order at ${order.createdAt}
                                     </td>
 
                                     <td >

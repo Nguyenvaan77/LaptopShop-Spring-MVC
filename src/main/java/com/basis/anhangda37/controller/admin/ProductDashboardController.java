@@ -2,10 +2,10 @@ package com.basis.anhangda37.controller.admin;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.jaxb.SpringDataJaxb.PageRequestDto;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,36 +17,29 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.Product;
-import com.basis.anhangda37.service.OrderDetailService;
-import com.basis.anhangda37.service.OrderService;
 import com.basis.anhangda37.service.ProductService;
 import com.basis.anhangda37.service.UploadService;
 
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 @Controller
-public class ProductController {
+public class ProductDashboardController {
+    @Value("${admin.dashboard.size.product}")
+    private int pageSizeOfProductDashboard;
+
     private final ProductService productService;
     private final UploadService uploadService;
-    private final OrderService orderService;
-    private final OrderDetailService orderDetailService;
 
-    public ProductController(ProductService productService, UploadService uploadService, OrderService orderService,
-            OrderDetailService orderDetailService) {
+    public ProductDashboardController(ProductService productService, UploadService uploadService) {
         this.productService = productService;
         this.uploadService = uploadService;
-        this.orderService = orderService;
-        this.orderDetailService = orderDetailService;
     }
 
     @GetMapping("/admin/product")
-    public String getDashboard(Model model, 
-                                @RequestParam(name = "page", defaultValue = "0") int page) {
-        Pageable pageable = PageRequest.of(page, 5);
+    public String getDashboard(Model model,
+            @RequestParam(name = "page", defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, pageSizeOfProductDashboard);
         Page<Product> prs = productService.getAllProduct(pageable);
         List<Product> products = prs.getContent();
         model.addAttribute("products", products);
@@ -140,7 +133,5 @@ public class ProductController {
         productService.deleteProductById(product.getId());
         return "redirect:/admin/product";
     }
-    
 
-    
 }

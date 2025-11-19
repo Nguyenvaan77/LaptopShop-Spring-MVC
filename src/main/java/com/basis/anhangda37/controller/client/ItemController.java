@@ -1,5 +1,6 @@
 package com.basis.anhangda37.controller.client;
 
+import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.kafka.KafkaProperties.Producer;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,6 +30,7 @@ import com.mysql.cj.exceptions.DeadlockTimeoutRollbackMarker;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -61,20 +64,25 @@ public class ItemController {
     }
 
     @GetMapping("/cart")
-    public String getCartPage(Model model, HttpServletRequest httpServletRequest) {
+    public String getCartPage(Model model, HttpServletRequest httpServletRequest, HttpServletResponse response)
+            throws IOException {
         HttpSession session = httpServletRequest.getSession();
         User user = userService.getUserByEmail((String) session.getAttribute("email"));
         Cart cart = cartService.findCartByUser(user);
         List<CartDetail> cartDetails = cartDetailService.getCartDetailByCart(cart);
-        List<CartDetailDto> cartDetailDtos = cartDetailService.convertCartDetailToDto(cartDetails);
-        double totalPayment = 0;
-        for (CartDetailDto cartDetailDto : cartDetailDtos) {
-            totalPayment += cartDetailDto.getTotal();
+        if (cartDetails.size() <= 0) {
+            return "client/cart/empty-cart";
+        } else {
+            List<CartDetailDto> cartDetailDtos = cartDetailService.convertCartDetailToDto(cartDetails);
+            double totalPayment = 0;
+            for (CartDetailDto cartDetailDto : cartDetailDtos) {
+                totalPayment += cartDetailDto.getTotal();
+            }
+            model.addAttribute("cartDetails", cartDetailDtos);
+            model.addAttribute("totalPayment", totalPayment);
+            model.addAttribute("cart", cart);
+            return "client/cart/show";
         }
-        model.addAttribute("cartDetails", cartDetailDtos);
-        model.addAttribute("totalPayment", totalPayment);
-        model.addAttribute("cart", cart);
-        return "client/cart/show";
     }
 
     @PostMapping("/remove-product-from-cart/{productId}")

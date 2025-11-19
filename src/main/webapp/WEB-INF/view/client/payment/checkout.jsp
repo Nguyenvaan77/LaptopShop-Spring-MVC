@@ -95,8 +95,38 @@
                         <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
                         <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
                     </div>
-                    <form:form action = "/confirm-order" method = "post" modelAttribute="cart">
+                    <form:form action = "/order/payment/create" method = "post" modelAttribute="cart">
+                        <div style="display: none;">
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="amount" 
+                                            type="number" 
+                                            value="${totalPayment}"
+                                            name = "amount"/>
+                                <label for="amount" class="form-label">Customer name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="bankCode" 
+                                            type="text" 
+                                            value="NCB"
+                                            name = "bankCode"/>
+                                <label for="bankCode" class="form-label">Customer name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input class="form-control" 
+                                            id="orderId" 
+                                            type="text" 
+                                            value="72"
+                                            name = "orderId"/>
+                                <label for="orderId" class="form-label">Customer name</label>
+                            </div>
+                        </div>
+
                         <div>
+
                             <div class="form-floating mb-3">
                                 <input class="form-control" 
                                             id="inputName" 
@@ -143,29 +173,29 @@
                                         <p class="mb-0 pe-4" cart-total-price = "${totalPayment}">${totalPayment} đ</p>
                                     </div>
                                     
-                                        <input type="hidden" name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
-                                        <div style = "display: none">
-                                            <c:forEach var = "cartDetail" items = "${cart.cartDetails}" varStatus = "status">
-                                                <form:input class="form-control" 
-                                                            type="text" 
-                                                            value = "${cartDetail.id}"
-                                                            path="cartDetails[${status.index}].id"/>
+                                    <input type="hidden" name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
+                                    <div style = "display: none">
+                                        <c:forEach var = "cartDetail" items = "${cart.cartDetails}" varStatus = "status">
+                                            <form:input class="form-control" 
+                                                        type="text" 
+                                                        value = "${cartDetail.id}"
+                                                        path="cartDetails[${status.index}].id"/>
 
-                                                <form:input class="form-control" 
-                                                            type="text" 
-                                                            value = "${cartDetail.quantity}"
-                                                            path="cartDetails[${status.index}].quantity"/>
-                                            </c:forEach>
-                                            
-                                            <div class="form-floating mb-3">
-                                                <input class="form-control" 
-                                                            type="number" 
-                                                            name = "totalPayment"
-                                                            value="${totalPayment}"/>
-                                            </div>
-                                            
+                                            <form:input class="form-control" 
+                                                        type="text" 
+                                                        value = "${cartDetail.quantity}"
+                                                        path="cartDetails[${status.index}].quantity"/>
+                                        </c:forEach>
+                                        
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" 
+                                                        type="number" 
+                                                        name = "totalPayment"
+                                                        value="${totalPayment}"/>
                                         </div>
-                                        <button class="btn btn-primary btn-success border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit">Confirm order</button>
+                                        
+                                    </div>
+                                    <button class="btn btn-primary btn-success border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="submit">Confirm order</button>
                                         
                                     </form:form>
                                     

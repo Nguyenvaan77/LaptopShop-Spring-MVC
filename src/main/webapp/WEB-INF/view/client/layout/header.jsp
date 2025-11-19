@@ -58,7 +58,7 @@
                                         </li>
 
                                         <li>
-                                            <a class="dropdown-item" href="#">Quản lý tài khoản</a>
+                                            <a class="dropdown-item" href="/user/information">Quản lý tài khoản</a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item" href="/order-history">Lịch sử mua hàng</a>

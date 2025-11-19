@@ -3,6 +3,9 @@ package com.basis.anhangda37.domain.dto;
 import java.util.List;
 import java.util.Optional;
 
+/*
+ * Dùng để lưu dữ liệu Product filter Search
+ */
 public class ProductCriteriaDto {
     private Optional<String> page;
     private Optional<List<String>> factory;
