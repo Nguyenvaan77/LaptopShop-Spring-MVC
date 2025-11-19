@@ -1,6 +1,7 @@
 package com.basis.anhangda37.controller.client;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import jakarta.validation.Valid;
 
 @Controller
 public class OrderController {
+    
 
     private final OrderDetailService orderDetailService;
     private final VnPayService vnPayService;
@@ -122,14 +124,14 @@ public class OrderController {
 
     @GetMapping("/order/check-status/{id}")
     public void checkStatusAndRedirect(
-            @PathVariable("id") Long orderId, 
-            HttpServletRequest request, 
+            @PathVariable("id") Long orderId,
+            HttpServletRequest request,
             HttpServletResponse response) throws IOException {
-        
+
         try {
             // Lấy IP server (bạn có thể hardcode "127.0.0.1" nếu test local)
-            String ipAddress = PayConfig.getIpAddress(request); 
-            
+            String ipAddress = PayConfig.getIpAddress(request);
+
             // 1. GỌI SERVICE, SERVICE SẼ TỰ ĐỘNG CẬP NHẬT DB
             String redirectUrl = orderService.checkOrderStatus(orderId, ipAddress);
 
@@ -141,4 +143,5 @@ public class OrderController {
             response.sendRedirect("/error-page");
         }
     }
+    
 }

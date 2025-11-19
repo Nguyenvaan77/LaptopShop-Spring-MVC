@@ -32,7 +32,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         return bean;
     }
 
-    @Bean 
+    @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplate();
     }
@@ -43,7 +43,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void addResourceHandlers(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(
+            org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/css/**").addResourceLocations("/resources/css/");
         registry.addResourceHandler("/js/**").addResourceLocations("/resources/js/");
         registry.addResourceHandler("/images/**").addResourceLocations("/resources/images/");

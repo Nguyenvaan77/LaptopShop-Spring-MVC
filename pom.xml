@@ -91,6 +91,7 @@
 		</dependency>
 		<!-- Hết các dêpndency phục vụ cho view engine Jsp -->
 
+
 		<!-- Dependency spring data jpa -->
 
 
@@ -118,6 +119,8 @@
 			<version>2.10.1</version>
 		</dependency>
 
+	
+
 	</dependencies>
 
 	<build>
@@ -126,7 +129,11 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			
 		</plugins>
+
+
 	</build>
 
 </project>

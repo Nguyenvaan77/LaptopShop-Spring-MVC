@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.basis.anhangda37.domain.Role;
 import com.basis.anhangda37.domain.User;
+import com.basis.anhangda37.service.RoleService;
 import com.basis.anhangda37.service.UploadService;
 import com.basis.anhangda37.service.UserService;
-
 
 import jakarta.validation.Valid;
 
@@ -34,12 +35,14 @@ public class UserDashboardController {
     private final UserService userService;
     private final UploadService uploadService;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
     public UserDashboardController(UserService userService, UploadService uploadService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userService = userService;
         this.uploadService = uploadService;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     @GetMapping(value = "/admin/user")
@@ -106,7 +109,8 @@ public class UserDashboardController {
             user1.setAddress(user.getAddress());
             user1.setFullName(user.getFullName());
             user1.setPhone(user.getPhone());
-            user1.setRole(user.getRole());
+            Role role = roleService.findByName(user.getRole().getName());
+            user1.setRole(role);
             String avatarPath = uploadService.handleSaveUploadFile(file, "avatar");
             if (!(avatarPath == null || avatarPath.isBlank() || avatarPath.isEmpty())) {
                 user1.setAvatar(avatarPath);

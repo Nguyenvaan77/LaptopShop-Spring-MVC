@@ -18,6 +18,18 @@ box-shadow: 5px 5px 10px grey;
   background: #d7f5da;
 }
 
+.pending-yellow-box{
+  width: 100%;
+  height: 140px;
+  background: #f6ffa6;
+}
+
+.failed-red-box{
+  width: 100%;
+  height: 140px;
+  background: #ffa6a6;
+}
+
 
 .monserrat-font{
   font-family: 'Montserrat', sans-serif;

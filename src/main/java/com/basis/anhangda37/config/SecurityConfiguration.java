@@ -62,19 +62,20 @@ public class SecurityConfiguration {
                                 jakarta.servlet.DispatcherType.INCLUDE)
                         .permitAll()
 
-                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/client/**", "/product/**", "/product")
+                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/client/**", "/product/**",
+                                "/product")
                         .permitAll()
 
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
 
                 .sessionManagement((sessionManagement) -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                         .invalidSessionUrl(("/logout?expired"))
-                        .maximumSessions(1)//Giới hạn số tài khoản có thể đặng nhập đồng thời vào hệ thống 
-                        .maxSessionsPreventsLogin(false))//false cho phép người thứ 2 đăng nhập thì người thứ nhất sẽ out
+                        .maximumSessions(1)// Giới hạn số tài khoản có thể đặng nhập đồng thời vào hệ thống
+                        .maxSessionsPreventsLogin(false))// false cho phép người thứ 2 đăng nhập thì người thứ nhất sẽ
+                                                         // out
 
                 .logout(logout -> logout.deleteCookies("JSESSIONID").invalidateHttpSession(true))
 
@@ -85,15 +86,11 @@ public class SecurityConfiguration {
                         .failureUrl("/login?error")
                         .successHandler(getAuthenticationSuccessHandler())
                         .permitAll())
-                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"))
-                        ;
+                .exceptionHandling(ex -> ex.accessDeniedPage("/access-deny"));
 
         return http.build();
     }
 
-    /*
-     * Bean cho phép có // trong url
-     */
     @Bean
     public StrictHttpFirewall httpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
