@@ -187,6 +187,11 @@ public class OrderService {
         return dto;
     }
 
+    public Order getByVnpTxnRef(String vnp_TxnRef) {
+        Payment payment = paymentRepository.findByVnpTxnRef(vnp_TxnRef).get();
+        return orderRepository.findByPayment(payment).get();
+    }
+
     public List<Order> getAllOrdersByUser(User user) {
         return orderRepository.findByUser(user);
     }

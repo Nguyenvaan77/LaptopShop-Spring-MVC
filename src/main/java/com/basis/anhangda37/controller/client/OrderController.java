@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 
 import com.basis.anhangda37.config.PayConfig;
 import com.basis.anhangda37.domain.Cart;
@@ -23,9 +25,11 @@ import com.basis.anhangda37.domain.Payment;
 import com.basis.anhangda37.domain.dto.InitPaymentDto;
 import com.basis.anhangda37.domain.dto.OrderRequestDto;
 import com.basis.anhangda37.domain.dto.OrderResponseDto;
+import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.service.CommonPaymentService;
 import com.basis.anhangda37.service.OrderDetailService;
 import com.basis.anhangda37.service.OrderService;
+import com.basis.anhangda37.service.ProductService;
 import com.basis.anhangda37.service.VnPayService;
 import com.basis.anhangda37.service.interf.PaymentService;
 
@@ -37,19 +41,23 @@ import jakarta.validation.Valid;
 
 @Controller
 public class OrderController {
-    
 
     private final OrderDetailService orderDetailService;
     private final VnPayService vnPayService;
     private final CommonPaymentService commonPaymentService;
     private final OrderService orderService;
+    private final ProductService productService;
+    private final OrderRepository orderRepository;
 
     public OrderController(VnPayService vnPayService, CommonPaymentService commonPaymentService,
-            OrderService orderService, OrderDetailService orderDetailService) {
+            OrderService orderService, OrderDetailService orderDetailService, ProductService productService,
+            OrderRepository orderRepository) {
         this.vnPayService = vnPayService;
         this.commonPaymentService = commonPaymentService;
         this.orderService = orderService;
         this.orderDetailService = orderDetailService;
+        this.productService = productService;
+        this.orderRepository = orderRepository;
     }
 
     @PostMapping("order/payment/create")
@@ -96,11 +104,17 @@ public class OrderController {
             response.sendRedirect("/thanks");
             String vnp_TxnRef = fields.get("vnp_TxnRef");
             vnPayService.paySuccessfully(vnp_TxnRef);
+            Order order = orderService.getByVnpTxnRef(vnp_TxnRef);
+            order.isShipping();
+            orderRepository.save(order);
         } else {
             System.out.println("Không trùng chữ kí");
             response.sendRedirect("/access-deny");
             String vnp_TxnRef = fields.get("vnp_TxnRef");
             vnPayService.payPending(vnp_TxnRef);
+            Order order = orderService.getByVnpTxnRef(vnp_TxnRef);
+            order.isPending();
+            orderRepository.save(order);
         }
 
     }
@@ -143,5 +157,5 @@ public class OrderController {
             response.sendRedirect("/error-page");
         }
     }
-    
+
 }
