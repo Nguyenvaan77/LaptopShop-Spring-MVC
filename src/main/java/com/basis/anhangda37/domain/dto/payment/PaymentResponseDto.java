@@ -1,4 +1,4 @@
-package com.basis.anhangda37.domain.dto;
+package com.basis.anhangda37.domain.dto.payment;
 
 public class PaymentResponseDto {
     private String paymentUrl;

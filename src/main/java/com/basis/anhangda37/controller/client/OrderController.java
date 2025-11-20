@@ -22,9 +22,11 @@ import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Order;
 import com.basis.anhangda37.domain.Payment;
-import com.basis.anhangda37.domain.dto.InitPaymentDto;
 import com.basis.anhangda37.domain.dto.OrderRequestDto;
 import com.basis.anhangda37.domain.dto.OrderResponseDto;
+import com.basis.anhangda37.domain.dto.payment.InitPaymentDto;
+import com.basis.anhangda37.domain.dto.payment.PaymentCallBackData;
+import com.basis.anhangda37.exception.payment.SignNotVerifyException;
 import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.service.CommonPaymentService;
 import com.basis.anhangda37.service.OrderDetailService;
@@ -79,10 +81,9 @@ public class OrderController {
     }
 
     @GetMapping("order/payment/vnpay-return")
-    public void vnpayReturn(HttpServletRequest request,
+    public String vnpayReturn(HttpServletRequest request,
             HttpServletResponse response,
             Model model) throws IOException {
-        // Bước 1: Lấy toàn bộ tham số trả về
         Map<String, String> fields = new HashMap<>();
         Enumeration<String> params = request.getParameterNames();
         while (params.hasMoreElements()) {
@@ -92,49 +93,33 @@ public class OrderController {
                 fields.put(fieldName, fieldValue);
             }
         }
+        PaymentCallBackData callBackData = new PaymentCallBackData();
+        callBackData.setIpAddress(request.getRemoteAddr());
+        callBackData.setParams(fields);
+        callBackData.setVnp_TxnRef(fields.get("vnp_TxnRef"));
 
-        // Bước 2: Tách chuỗi secure hash
-        String vnp_SecureHash = fields.get("vnp_SecureHash");
-        fields.remove("vnp_SecureHashType");
-        fields.remove("vnp_SecureHash");
-
-        // Kiểm tra sự nhất quán dữ liệu
-        if (verifySign(fields, vnp_SecureHash)) {
-            System.out.println("Dũ liệu nhất quán");
-            response.sendRedirect("/thanks");
-            String vnp_TxnRef = fields.get("vnp_TxnRef");
-            vnPayService.paySuccessfully(vnp_TxnRef);
-            Order order = orderService.getByVnpTxnRef(vnp_TxnRef);
-            order.isShipping();
-            orderRepository.save(order);
-        } else {
-            System.out.println("Không trùng chữ kí");
-            response.sendRedirect("/access-deny");
-            String vnp_TxnRef = fields.get("vnp_TxnRef");
-            vnPayService.payPending(vnp_TxnRef);
-            Order order = orderService.getByVnpTxnRef(vnp_TxnRef);
-            order.isPending();
-            orderRepository.save(order);
+        try {
+            vnPayService.hanlderVnPayReturnAfterSendPaymentUrl(callBackData);
+        } catch (SignNotVerifyException ex) {
+            return "client/homepage/deny";
         }
-
-    }
-
-    private boolean verifySign(Map<String, String> fields, String vnp_SecureHash) {
-        String signValue = PayConfig.hashAllFields(fields);
-        return signValue.equals(vnp_SecureHash);
-    }
-
-    @GetMapping("/order/{txnRef}/{status}")
-    public String getSuccessCheckOutPage(@PathVariable("txnRef") String txnRef, @PathVariable("status") String status,
-            Model model) {
-        if (status.equals("success")) {
-            Payment payment = commonPaymentService.getPaymentByTxn_Ref(txnRef);
-            Order order = orderService.getOrderById(payment.getOrder().getId());
-            model.addAttribute("orderCode", order.getId());
-        }
-        ;
+        Long orderId = orderService.getByVnpTxnRef(callBackData.getVnp_TxnRef()).getId();
+        model.addAttribute("orderCode", orderId);
         return "client/cart/thanks";
     }
+
+    // @GetMapping("/order/{txnRef}/{status}")
+    // public String getSuccessCheckOutPage(@PathVariable("txnRef") String txnRef,
+    // @PathVariable("status") String status,
+    // Model model) {
+    // if (status.equals("success")) {
+    // Payment payment = commonPaymentService.getPaymentByTxn_Ref(txnRef);
+    // Order order = orderService.getOrderById(payment.getOrder().getId());
+    // model.addAttribute("orderCode", order.getId());
+    // }
+    // ;
+    // return "client/cart/thanks";
+    // }
 
     @GetMapping("/order/check-status/{id}")
     public void checkStatusAndRedirect(
@@ -147,7 +132,7 @@ public class OrderController {
             String ipAddress = PayConfig.getIpAddress(request);
 
             // 1. GỌI SERVICE, SERVICE SẼ TỰ ĐỘNG CẬP NHẬT DB
-            String redirectUrl = orderService.checkOrderStatus(orderId, ipAddress);
+            String redirectUrl = vnPayService.checkOrderPaymentStatus(orderId, ipAddress);
 
             // 2. CONTROLLER CHỈ VIỆC REDIRECT
             response.sendRedirect(redirectUrl);

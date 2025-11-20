@@ -83,7 +83,7 @@ public class HomePageController {
     @GetMapping("/order-history")
     public String getOrderHistoryPage(HttpServletRequest request, Model model) {
         User user = userService.getUserByEmail((String) request.getSession().getAttribute("email"));
-        List<Order> orders = orderService.getAllOrdersByUser(user);
+        List<Order> orders = orderService.getAllOrdersByUserOrderByCreatedAtDesc(user);
         model.addAttribute("orders", orders);
         return "client/order/order-history";
     }

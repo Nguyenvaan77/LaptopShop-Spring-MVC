@@ -19,7 +19,7 @@ import com.basis.anhangda37.domain.Product;
 import com.basis.anhangda37.domain.User;
 import com.basis.anhangda37.domain.dto.OrderRequestDto;
 import com.basis.anhangda37.domain.dto.OrderResponseDto;
-import com.basis.anhangda37.domain.dto.PaymentResponseDto;
+import com.basis.anhangda37.domain.dto.payment.PaymentResponseDto;
 import com.basis.anhangda37.domain.enums.OrderStatus;
 import com.basis.anhangda37.domain.enums.PaymentStatus;
 import com.basis.anhangda37.repository.CartDetailRepository;
@@ -54,87 +54,6 @@ public class OrderService {
         this.cartRepository = cartRepository;
         this.paymentRepository = paymentRepository;
         this.vnPayService = vnPayService;
-    }
-
-    /*
-     * Kiểm tra đơn hàng đã được thanh toán hay chưa dựa trên API query gửi lên
-     * meichant
-     */
-    @Transactional
-    public String checkOrderStatus(Long orderId, String ipAddress) {
-        Order order;
-        try {
-            order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy Order với ID: " + orderId));
-        } catch (Exception e) {
-            // Nếu không tìm thấy Order ID
-            return PayConfig.REDIRECT_FAILED_URL + "0"; // Trả về trang thất bại chung
-        }
-
-        Payment payment = order.getPayment();
-        if (payment == null || payment.getVnpTxnRef() == null || payment.getCreatedAt() == null) {
-            // Đơn hàng không có thông tin thanh toán -> Lỗi
-            return PayConfig.REDIRECT_FAILED_URL + orderId;
-        }
-
-        // 1. Gọi VNPAY Service để truy vấn
-        Map<String, Object> vnpayResponse;
-        try {
-            vnpayResponse = vnPayService.queryTransaction(
-                    payment.getVnpTxnRef(),
-                    payment.getCreatedAt(),
-                    ipAddress);
-        } catch (Exception e) {
-            // Lỗi khi gọi VNPAY (vd: timeout, sai chữ ký)
-            System.err.println("Lỗi VNPAY Query: " + e.getMessage());
-            // Tạm trả về trang pending, vì chúng ta chưa biết chắc trạng thái
-            return PayConfig.REDIRECT_PENDING_URL + orderId;
-        }
-
-        // 2. Phân tích kết quả
-        String vnp_ResponseCode = (String) vnpayResponse.get("vnp_ResponseCode");
-        String vnp_TransactionStatus = (String) vnpayResponse.get("vnp_TransactionStatus");
-
-        // Kiểm tra xem lệnh QueryDr có thành công không
-        if (!"00".equals(vnp_ResponseCode)) {
-            // Lỗi từ VNPAY (vd: 91: Không tìm thấy giao dịch)
-            String message = (String) vnpayResponse.get("vnp_Message");
-            System.err.println("Lỗi VNPAY Query (vnp_ResponseCode != 00): " + message);
-
-            // Không tìm thấy giao dịch -> coi như thất bại
-            return PayConfig.REDIRECT_FAILED_URL + orderId;
-        }
-
-        // 3. Cập nhật trạng thái Payment và Order dựa trên vnp_TransactionStatus
-        // và quyết định URL redirect
-        String redirectUrl;
-
-        switch (vnp_TransactionStatus) {
-            case "00": // Giao dịch thanh toán thành công
-                payment.setStatus(PaymentStatus.SUCCESS);
-                order.setStatus(OrderStatus.SHIPPING); // Hoặc PAID, SUCCESS tùy logic
-                redirectUrl = PayConfig.REDIRECT_SUCCESS_URL + orderId;
-                break;
-
-            case "01": // Giao dịch chưa hoàn tất
-                payment.setStatus(PaymentStatus.PENDING);
-                order.setStatus(OrderStatus.PENDING);
-                redirectUrl = PayConfig.REDIRECT_PENDING_URL + orderId;
-                break;
-
-            default: // 02, 04, 05, 06, 07, 09... -> Giao dịch lỗi/bị từ chối/hoàn
-                payment.setStatus(PaymentStatus.FAIL);
-                order.setStatus(OrderStatus.CANCEL);
-                redirectUrl = PayConfig.REDIRECT_FAILED_URL + orderId;
-                break;
-        }
-
-        // 4. Lưu thay đổi vào CSDL
-        paymentRepository.save(payment);
-        orderRepository.save(order);
-
-        // 5. Trả về URL
-        return redirectUrl;
     }
 
     @Transactional
@@ -194,6 +113,10 @@ public class OrderService {
 
     public List<Order> getAllOrdersByUser(User user) {
         return orderRepository.findByUser(user);
+    }
+
+    public List<Order> getAllOrdersByUserOrderByCreatedAtDesc(User user) {
+        return orderRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
     public List<Order> getAllOrders() {
@@ -262,7 +185,7 @@ public class OrderService {
             orderDetail.setProduct(cartDetail.getProduct());
             orderDetail.setPrice(cartDetail.getProduct().getPrice() *
                     cartDetail.getQuantity());
-            
+
             cartDetail.getProduct().setSold(cartDetail.getProduct().getSold() + cartDetail.getQuantity());
             orderDetail.setOrder(order);
             orderDetails.add(orderDetail);

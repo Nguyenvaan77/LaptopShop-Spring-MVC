@@ -1,5 +1,7 @@
 package com.basis.anhangda37.domain.dto;
 
+import com.basis.anhangda37.domain.dto.payment.PaymentResponseDto;
+
 public class OrderResponseDto {
     private Long orderId;
     private PaymentResponseDto paymentResponse;
