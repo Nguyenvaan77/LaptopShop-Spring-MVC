@@ -3,6 +3,8 @@ package com.basis.anhangda37.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.basis.anhangda37.config.SecurityConfiguration;
+
 import com.basis.anhangda37.domain.Cart;
 import com.basis.anhangda37.domain.CartDetail;
 import com.basis.anhangda37.domain.Order;
@@ -18,281 +20,492 @@ import com.basis.anhangda37.domain.OrderDetail;
 import com.basis.anhangda37.domain.Product;
 import com.basis.anhangda37.domain.User;
 import com.basis.anhangda37.domain.dto.ProductCriteriaDto;
+import com.basis.anhangda37.exception.CartNotFoundException;
+import com.basis.anhangda37.exception.ProductNotFoundException;
+import com.basis.anhangda37.exception.UserNotFoundException;
 import com.basis.anhangda37.repository.CartDetailRepository;
 import com.basis.anhangda37.repository.CartRepository;
 import com.basis.anhangda37.repository.OrderDetailRepository;
 import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.repository.ProductRepository;
 import com.basis.anhangda37.repository.UserRepository;
+import com.basis.anhangda37.service.iface.IProductService;
 import com.basis.anhangda37.service.specification.ProductSpec;
+import com.basis.anhangda37.util.AppConstants;
 
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * Service class for Product-related operations.
+ * Handles product management, filtering, and business logic related to products.
+ * Implements clean separation of concerns and dependency injection.
+ */
 @Service
-public class ProductService {
+public class ProductService implements IProductService {
 
-    private final SecurityConfiguration securityConfiguration;
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
-    private final CartService cartService;
-
-    private final CartDetailService cartDetailService;
-    private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
-    private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartDetailRepository cartDetailRepository;
+    private final OrderRepository orderRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final UserRepository userRepository;
 
-    public ProductService(UserRepository userRepository, ProductRepository productRepository,
-            CartRepository cartRepository, CartDetailRepository cartDetailRepository, OrderRepository orderRepository,
-            OrderDetailRepository orderDetailRepository, CartDetailService cartDetailService, CartService cartService,
-            SecurityConfiguration securityConfiguration) {
-        this.userRepository = userRepository;
+    /**
+     * Constructs a ProductService with required repositories.
+     * Uses constructor injection for dependency management.
+     */
+    public ProductService(ProductRepository productRepository, CartRepository cartRepository,
+            CartDetailRepository cartDetailRepository, OrderRepository orderRepository,
+            OrderDetailRepository orderDetailRepository, UserRepository userRepository) {
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.cartDetailRepository = cartDetailRepository;
-        this.orderDetailRepository = orderDetailRepository;
         this.orderRepository = orderRepository;
-        this.cartDetailService = cartDetailService;
-        this.cartService = cartService;
-        this.securityConfiguration = securityConfiguration;
+        this.orderDetailRepository = orderDetailRepository;
+        this.userRepository = userRepository;
     }
 
+    /**
+     * Retrieves a product by its ID.
+     * @param id The product ID
+     * @return The product
+     * @throws ProductNotFoundException if the product doesn't exist
+     */
+    @Override
     public Product getProductById(Long id) {
-        return productRepository.findById(id).orElse(null);
+        logger.debug("Fetching product with id: {}", id);
+        return productRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Product not found with id: {}", id);
+                    return new ProductNotFoundException(id);
+                });
     }
 
-    public List<Product> getAllProduct() {
+    /**
+     * Retrieves all products.
+     * @return A list of all products
+     */
+    @Override
+    public List<Product> getAllProducts() {
+        logger.debug("Fetching all products");
         return productRepository.findAll();
     }
 
-    public Page<Product> getAllProduct(Pageable pageable) {
+    /**
+     * Retrieves all products with pagination.
+     * @param pageable The pagination information
+     * @return A page of products
+     */
+    @Override
+    public Page<Product> getAllProducts(Pageable pageable) {
+        logger.debug("Fetching products with pagination: page={}, size={}", 
+                pageable.getPageNumber(), pageable.getPageSize());
         return productRepository.findAll(pageable);
     }
 
-    public Page<Product> getAllProduct(String name, Pageable pageable) {
+    /**
+     * Retrieves all products with pagination.
+     * @param pageable The pagination information
+     * @return A page of products
+     */
+    @Override
+    public Page<Product> fetchProductWithSpecification(Pageable pageable, ProductCriteriaDto dto) {
+        Specification<Product> spec = Specification.where(null);
+
+    // filter factory
+    if (dto.getFactory().isPresent() && !dto.getFactory().get().isEmpty()) {
+        spec = spec.and(ProductSpec.belongListFactory(dto.getFactory().get()));
+    }
+
+    // filter target
+    if (dto.getTarget().isPresent() && !dto.getTarget().get().isEmpty()) {
+        spec = spec.and(ProductSpec.belongListTarget(dto.getTarget().get()));
+    }
+
+    // filter price range
+    if (dto.getPrice().isPresent() && !dto.getPrice().get().isEmpty()) {
+
+        List<Double[]> priceRanges = dto.getPrice().get().stream()
+                .map(item -> {
+                    String[] arr = item.split("-");
+                    Double min = Double.parseDouble(arr[0]);
+                    Double max = Double.parseDouble(arr[1]);
+                    return new Double[]{min, max};
+                })
+                .toList();
+
+        spec = spec.and(ProductSpec.listRangePrice(priceRanges));
+    }
+
+        return productRepository.findAll(spec, pageable);
+    }
+
+    /**
+     * Searches for products by name with pagination.
+     * @param name The product name to search for
+     * @param pageable The pagination information
+     * @return A page of matching products
+     */
+    @Override
+    public Page<Product> searchProductsByName(String name, Pageable pageable) {
+        logger.debug("Searching products by name: {}", name);
         return productRepository.findAll(ProductSpec.nameLike(name), pageable);
     }
 
-    public void deleteProductById(Long id) {
-        if (productRepository.existsById(id)) {
-            productRepository.deleteById(id);
-        }
-    }
-
+    /**
+     * Saves or updates a product.
+     * @param product The product to save
+     * @return The saved product
+     */
+    @Override
     public Product saveProduct(Product product) {
-        return productRepository.save(product);
+        logger.info("Saving product: {}", product.getName());
+        Product savedProduct = productRepository.save(product);
+        logger.debug("Product saved successfully with id: {}", savedProduct.getId());
+        return savedProduct;
     }
 
-    public void deleteById(Long id) {
-        if (productRepository.existsById(id)) {
-            productRepository.deleteById(id);
+    /**
+     * Deletes a product by ID.
+     * @param id The product ID
+     */
+    @Override
+    public void deleteProductById(Long id) {
+        logger.info("Deleting product with id: {}", id);
+        if (!productRepository.existsById(id)) {
+            logger.warn("Attempted to delete non-existent product with id: {}", id);
+            throw new ProductNotFoundException(id);
         }
+        productRepository.deleteById(id);
+        logger.debug("Product deleted successfully with id: {}", id);
     }
 
-    public long countProduct() {
+    /**
+     * Returns the total count of products.
+     * @return The product count
+     */
+    @Override
+    public long countProducts() {
+        logger.debug("Counting total products");
         return productRepository.count();
     }
 
-    public void handleProductToCart(HttpSession session, String gmailUser, Long productId, Long quantityToAdd) {
-        User user = userRepository.findByEmail(gmailUser);
+    /**
+     * Retrieves products filtered by factory with pagination.
+     * @param factories The list of factory names
+     * @param pageable The pagination information
+     * @return A page of matching products
+     */
+    @Override
+    public Page<Product> getProductsByFactories(List<String> factories, Pageable pageable) {
+        logger.debug("Fetching products by factories: {}", factories);
+        return productRepository.findAll(ProductSpec.belongListFactory(factories), pageable);
+    }
+
+    /**
+     * Retrieves products filtered by price range with pagination.
+     * @param priceRanges The list of price range strings
+     * @param pageable The pagination information
+     * @return A page of matching products
+     */
+    @Override
+    public Page<Product> getProductsByPriceRanges(List<String> priceRanges, Pageable pageable) {
+        logger.debug("Fetching products by price ranges: {}", priceRanges);
+        List<Double[]> priceThresholds = convertPriceRangesToThresholds(priceRanges);
+        return productRepository.findAll(ProductSpec.listRangePrice(priceThresholds), pageable);
+    }
+
+    /**
+     * Retrieves products with advanced filtering based on criteria.
+     * @param page The pagination information
+     * @param criteria The filtering criteria
+     * @return A page of matching products
+     */
+    @Override
+    public Page<Product> getProductsByAdvancedCriteria(Pageable page, ProductCriteriaDto criteria) {
+        logger.debug("Fetching products with advanced criteria: {}", criteria);
+        Specification<Product> combinedSpec = Specification.allOf();
+
+        if (criteria.getFactory() != null && criteria.getFactory().isPresent()) {
+            Specification<Product> factorySpec = ProductSpec.belongListFactory(criteria.getFactory().get());
+            combinedSpec = combinedSpec.and(factorySpec);
+        }
+
+        if (criteria.getTarget() != null && criteria.getTarget().isPresent()) {
+            Specification<Product> targetSpec = ProductSpec.belongListTarget(criteria.getTarget().get());
+            combinedSpec = combinedSpec.and(targetSpec);
+        }
+
+        if (criteria.getPrice() != null && criteria.getPrice().isPresent()) {
+            List<Double[]> priceThresholds = convertPriceRangesToThresholds(criteria.getPrice().get());
+            Specification<Product> priceSpec = ProductSpec.listRangePrice(priceThresholds);
+            combinedSpec = combinedSpec.and(priceSpec);
+        }
+
+        Pageable sortedPage = page;
+        if (criteria.getSort() != null && criteria.getSort().isPresent()) {
+            String sortOption = criteria.getSort().get();
+            if (!sortOption.equals("khong")) {
+                Sort sort = sortOption.equals("tang-dan") 
+                    ? Sort.by(Sort.Direction.ASC, "price")
+                    : Sort.by(Sort.Direction.DESC, "price");
+                sortedPage = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
+            }
+        }
+
+        return productRepository.findAll(combinedSpec, sortedPage);
+    }
+
+    /**
+     * Handles adding a product to the user's cart.
+     * Creates a new cart if the user doesn't have one, or updates existing cart detail.
+     * @param session The HTTP session
+     * @param email The user's email
+     * @param productId The product ID to add
+     * @param quantityToAdd The quantity to add
+     */
+    @Transactional
+    public void handleProductToCart(HttpSession session, String email, Long productId, Long quantityToAdd) {
+        logger.info("Adding product {} to cart for user {}", productId, email);
+        
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            logger.error("User not found with email: {}", email);
+            throw new UserNotFoundException("email", email);
+        }
+
+        Product product = getProductById(productId);
         Cart cart = cartRepository.findByUser(user);
-        Product product = productRepository.findById(productId).orElse(null);
 
         if (cart == null) {
-            Cart newCart = new Cart();
-            newCart.setUser(user);
-            newCart.setSum(0);
-            cartRepository.save(newCart);
+            cart = createNewCart(user, product, quantityToAdd);
+            logger.debug("Created new cart for user: {}", email);
+        } else {
+            updateCart(cart, product, quantityToAdd);
+            logger.debug("Updated existing cart for user: {}", email);
+        }
 
-            CartDetail newCartDetail = new CartDetail();
-            newCartDetail.setCart(newCart);
-            newCartDetail.setQuantity(quantityToAdd);
-            newCartDetail.setProduct(product);
+        session.setAttribute(AppConstants.SESSION_CART_SUM, cart.getSum());
+        logger.info("Product added to cart successfully");
+    }
 
-            newCart.addCartDetail(newCartDetail);
-            cartRepository.save(newCart);
-            session.setAttribute("sum", newCart.getSum());
+    /**
+     * Handles checkout process: updates product quantities and creates an order.
+     * @param email The user's email
+     * @param session The HTTP session
+     * @param receiverName The receiver's name
+     * @param receiverAddress The receiver's address
+     * @param receiverPhone The receiver's phone
+     * @param totalPayment The total payment amount
+     * @param cartDetails The cart details to checkout
+     * @return The order code/ID as a string
+     */
+    @Transactional
+    public String handleCheckOut(String email, HttpSession session, String receiverName, String receiverAddress,
+            String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
+        logger.info("Processing checkout for user: {}", email);
+        
+        updateProductQuantitiesBeforeCheckout(cartDetails);
+        String orderCode = createOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment, cartDetails);
+        
+        logger.info("Checkout completed successfully. Order code: {}", orderCode);
+        return orderCode;
+    }
+
+    /**
+     * Updates product quantities based on cart details before checkout.
+     * @param cartDetails The cart details containing quantities to deduct
+     */
+    private void updateProductQuantitiesBeforeCheckout(List<CartDetail> cartDetails) {
+        if (cartDetails == null || cartDetails.isEmpty()) {
+            logger.debug("No cart details to process");
             return;
         }
 
-        CartDetail existCartDetail = cartDetailRepository.findByCartAndProduct(cart, product);
-        if (existCartDetail == null) {
+        logger.debug("Updating product quantities for {} items", cartDetails.size());
+        for (CartDetail cartDetail : cartDetails) {
+            CartDetail fetchedCartDetail = cartDetailRepository.findById(cartDetail.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Cart detail not found"));
+            
+            Product product = fetchedCartDetail.getProduct();
+            Long quantityToSold = cartDetail.getQuantity();
+            
+            product.setQuantity(product.getQuantity() - quantityToSold);
+            productRepository.save(product);
+            
+            logger.debug("Product {} quantity updated. New quantity: {}", product.getId(), product.getQuantity());
+        }
+    }
+
+    /**
+     * Creates a new cart for the user with initial product.
+     * @param user The user
+     * @param product The product to add
+     * @param quantity The quantity
+     * @return The created cart
+     */
+    private Cart createNewCart(User user, Product product, Long quantity) {
+        Cart newCart = new Cart();
+        newCart.setUser(user);
+        newCart.setSum(0);
+        newCart = cartRepository.save(newCart);
+
+        CartDetail cartDetail = new CartDetail();
+        cartDetail.setCart(newCart);
+        cartDetail.setQuantity(quantity);
+        cartDetail.setProduct(product);
+
+        newCart.addCartDetail(cartDetail);
+        cartRepository.save(newCart);
+
+        return newCart;
+    }
+
+    /**
+     * Updates an existing cart with a product.
+     * @param cart The cart to update
+     * @param product The product to add
+     * @param quantityToAdd The quantity to add
+     */
+    private void updateCart(Cart cart, Product product, Long quantityToAdd) {
+        CartDetail existingCartDetail = cartDetailRepository.findByCartAndProduct(cart, product);
+
+        if (existingCartDetail == null) {
             CartDetail newCartDetail = new CartDetail();
             newCartDetail.setProduct(product);
             newCartDetail.setQuantity(quantityToAdd);
             newCartDetail.setCart(cart);
             cart.addCartDetail(newCartDetail);
             cartDetailRepository.save(newCartDetail);
-            session.setAttribute("sum", cart.getSum());
-            return;
-        }
-
-        existCartDetail.setQuantity(existCartDetail.getQuantity() + quantityToAdd);
-        cartDetailRepository.save(existCartDetail);
-    }
-
-    @Transactional
-    public String handleCheckOut(String email, HttpSession session, String receiverName, String receiverAddress,
-            String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
-        handleProductBeforeCheckout(cartDetails);
-        String orderCode = handlePlaceOrder(email, session, receiverName, receiverAddress, receiverPhone, totalPayment);
-        return orderCode;
-    }
-
-    // Phương thức lọc cho tìm kiếm
-    public Page<Product> getAllProductsByNameFilter(String name, Pageable page) {
-        return productRepository.findAll(ProductSpec.nameLike(name), page);
-    }
-
-    public Page<Product> getAllProductsByListFactoryFilter(List<String> listFactorys, Pageable page) {
-        return productRepository.findAll(ProductSpec.belongListFactory(listFactorys), page);
-    }
-
-    public Page<Product> getAllProductsByRangePriceFilter(String rangePriceString, Pageable page) {
-        Double minPrice = this.getMinPriceFromRangeString(rangePriceString);
-        Double maxPrice = this.getMaxPriceFromRangeString(rangePriceString);
-
-        return productRepository.findAll(ProductSpec.rangePrice(minPrice, maxPrice), page);
-    }
-
-    public Page<Product> getAllProductsByListRangePriceFilter(List<String> listRangePriceString, Pageable page) {
-        List<Double[]> listPriceThreshold = handlePriceThreshold(listRangePriceString);
-        return productRepository.findAll(ProductSpec.listRangePrice(listPriceThreshold), page);
-    }
-
-    public Page<Product> fetchProductWithSpecification(Pageable page, ProductCriteriaDto productCriteriaDto) {
-        Specification<Product> combinedSpec = Specification.allOf();
-
-        if (productCriteriaDto.getFactory() != null && productCriteriaDto.getFactory().isPresent()) {
-            Specification<Product> currentSpecs = ProductSpec.belongListFactory(productCriteriaDto.getFactory().get());
-            combinedSpec = combinedSpec.and(currentSpecs);
-        }
-
-        if (productCriteriaDto.getTarget() != null && productCriteriaDto.getTarget().isPresent()) {
-            Specification<Product> currentSpecs = ProductSpec.belongListTarget(productCriteriaDto.getTarget().get());
-            combinedSpec = combinedSpec.and(currentSpecs);
-        }
-
-        if (productCriteriaDto.getPrice() != null && productCriteriaDto.getPrice().isPresent()) {
-            Specification<Product> currentSpecs = ProductSpec
-                    .listRangePrice(handlePriceThreshold(productCriteriaDto.getPrice().get()));
-            combinedSpec = combinedSpec.and(currentSpecs);
-        }
-
-        if (productCriteriaDto.getSort() == null
-                || (!productCriteriaDto.getSort().isPresent() || productCriteriaDto.getSort().get().equals("khong"))) {
-            return this.productRepository.findAll(combinedSpec, page);
         } else {
-            String sortString = productCriteriaDto.getSort().get();
-            Sort sort;
-            if (sortString.equals("tang-dan")) {
-                sort = Sort.by(Sort.Direction.ASC, "price");
-            } else {
-                sort = Sort.by(Sort.Direction.DESC, "price");
-            }
-            Pageable sortedPageable = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
-            return this.productRepository.findAll(combinedSpec, sortedPageable);
+            existingCartDetail.setQuantity(existingCartDetail.getQuantity() + quantityToAdd);
+            cartDetailRepository.save(existingCartDetail);
+            logger.debug("Updated existing cart item quantity");
         }
     }
 
-    /*
-     * Đầu vào là chuỗi "10-toi-15-trieu"
-     * Split dựa trên kí tự "-"
-     * Chuỗi trả về có dạng String[] = {"10", "toi", "15", "trieu"}
-     * Kết quả: min là String[0]="10", max là String [2] ="15"
+    /**
+     * Creates an order from cart details.
+     * @param email The user's email
+     * @param session The HTTP session
+     * @param receiverName The receiver's name
+     * @param receiverAddress The receiver's address
+     * @param receiverPhone The receiver's phone
+     * @param totalPayment The total payment amount
+     * @param cartDetails The cart details
+     * @return The order ID as a string
      */
-    private String[] handleRangePrice(String rangePriceString) {
-        return rangePriceString.split("-");
-    }
-
-    private Double getMinPriceFromRangeString(String rangePriceString) {
-        return Double.parseDouble(handleRangePrice(rangePriceString)[0]);
-    }
-
-    private Double getMaxPriceFromRangeString(String rangePriceString) {
-        return Double.parseDouble(handleRangePrice(rangePriceString)[2]);
-    }
-
-    // Hết
-
-    private void handleProductBeforeCheckout(List<CartDetail> cartDetails) {
-        if (cartDetails == null || cartDetails.isEmpty()) {
-            return;
+    private String createOrder(String email, HttpSession session, String receiverName, String receiverAddress,
+            String receiverPhone, Double totalPayment, List<CartDetail> cartDetails) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            logger.error("User not found for email: {}", email);
+            throw new UserNotFoundException("email", email);
         }
 
-        for (CartDetail cartDetailDto : cartDetails) {
-            CartDetail fetchCartDetail = cartDetailRepository.findById(cartDetailDto.getId()).get();
-            Product product = fetchCartDetail.getProduct();
-            Long quantityToSold = cartDetailDto.getQuantity();
-            fetchCartDetail.setQuantity(quantityToSold);
-            product.setQuantity(product.getQuantity() - quantityToSold);
-            productRepository.save(product);
-            cartDetailRepository.save(fetchCartDetail);
-        }
-    }
-
-    private String handlePlaceOrder(String email, HttpSession session, String receiverName, String receiverAddress,
-
-            String receiverPhone, Double totalPayment) {
-        // User user = userRepository.findByEmail(email);
-        // Cart cart = user.getCart();
-
-        // cart.removeAllCartDetail();
-        // cartRepository.save(cart);
-        // user.removeCart();
-        // cart.setUser(null);
-        // cartRepository.deleteById(cart.getId());
-
-        User managedUser = userRepository.findByEmail(email);
         Order order = new Order();
         order.setReceiverAddress(receiverAddress);
         order.setReceiverName(receiverName);
         order.setReceiverPhone(receiverPhone);
-        order.setUser(managedUser);
+        order.setUser(user);
         order.setTotalPrice(totalPayment);
 
-        Cart cart = cartRepository.findByUser(managedUser);
-        List<CartDetail> cartDetails = cartDetailRepository.findByCart(cart);
+        List<OrderDetail> orderDetails = convertCartDetailsToOrderDetails(order, cartDetails);
+        order.setOrderDetails(orderDetails);
 
+        Order savedOrder = orderRepository.save(order);
+        logger.debug("Order created with id: {}", savedOrder.getId());
+
+        clearUserCart(user);
+        session.setAttribute(AppConstants.SESSION_CART_SUM, 0);
+
+        return String.valueOf(savedOrder.getId());
+    }
+
+    /**
+     * Converts cart details to order details and updates product sold count.
+     * @param order The order
+     * @param cartDetails The cart details
+     * @return List of order details
+     */
+    private List<OrderDetail> convertCartDetailsToOrderDetails(Order order, List<CartDetail> cartDetails) {
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         for (CartDetail cartDetail : cartDetails) {
             OrderDetail orderDetail = new OrderDetail();
+            Product product = cartDetail.getProduct();
+            
             orderDetail.setQuantity(cartDetail.getQuantity());
-            orderDetail.setProduct(cartDetail.getProduct());
-            orderDetail.setPrice(cartDetail.getProduct().getPrice() *
-                    cartDetail.getQuantity());
-            // Tăng số lượng sản phẩm đã bán ~ ++ sold (Product)
-            cartDetail.getProduct().setSold(cartDetail.getProduct().getSold() +
-                    cartDetail.getQuantity());
+            orderDetail.setProduct(product);
+            orderDetail.setPrice(product.getPrice() * cartDetail.getQuantity());
             orderDetail.setOrder(order);
             orderDetails.add(orderDetail);
+
+            // Update product sold count
+            product.setSold(product.getSold() + cartDetail.getQuantity());
+            productRepository.save(product);
+
+            logger.debug("Created order detail for product: {}", product.getId());
         }
 
-        order.setOrderDetails(orderDetails);
-        orderRepository.save(order);
-
-        cart.removeAllCartDetail();
-        managedUser.removeCart();
-        cart.setUser(null);
-        cartRepository.deleteById(cart.getId());
-
-        session.setAttribute("sum", 0);
-        return String.valueOf(order.getId());
+        return orderDetails;
     }
 
-    private List<Double[]> handlePriceThreshold(List<String> listRangePriceString) {
-        List<Double[]> listPriceThreshold = new ArrayList<>();
-
-        listRangePriceString.forEach(item -> {
-            Double[] foo = new Double[2];
-            foo[0] = this.getMinPriceFromRangeString(item);
-            foo[1] = this.getMaxPriceFromRangeString(item);
-            listPriceThreshold.add(foo);
-        });
-
-        return listPriceThreshold;
+    /**
+     * Clears the user's cart after checkout.
+     * @param user The user
+     */
+    private void clearUserCart(User user) {
+        Cart cart = cartRepository.findByUser(user);
+        if (cart != null) {
+            cart.removeAllCartDetail();
+            user.removeCart();
+            cart.setUser(null);
+            cartRepository.deleteById(cart.getId());
+            logger.debug("User cart cleared after checkout");
+        }
     }
 
+    /**
+     * Converts price range strings to double arrays with min and max values.
+     * Example: "10-toi-15-trieu" becomes [[10.0, 15.0]]
+     * @param priceRanges The list of price range strings
+     * @return List of double arrays with min and max price
+     */
+    private List<Double[]> convertPriceRangesToThresholds(List<String> priceRanges) {
+        List<Double[]> thresholds = new ArrayList<>();
+
+        for (String rangeString : priceRanges) {
+            Double[] range = new Double[2];
+            range[0] = extractMinPriceFromRange(rangeString);
+            range[1] = extractMaxPriceFromRange(rangeString);
+            thresholds.add(range);
+        }
+
+        return thresholds;
+    }
+
+    /**
+     * Extracts minimum price from a price range string.
+     * Example: "10-toi-15-trieu" returns 10.0
+     * @param rangeString The price range string
+     * @return The minimum price as a double
+     */
+    private Double extractMinPriceFromRange(String rangeString) {
+        String[] parts = rangeString.split("-");
+        return Double.parseDouble(parts[0]);
+    }
+
+    /**
+     * Extracts maximum price from a price range string.
+     * Example: "10-toi-15-trieu" returns 15.0
+     * @param rangeString The price range string
+     * @return The maximum price as a double
+     */
+    private Double extractMaxPriceFromRange(String rangeString) {
+        String[] parts = rangeString.split("-");
+        return Double.parseDouble(parts[2]);
+    }
 }

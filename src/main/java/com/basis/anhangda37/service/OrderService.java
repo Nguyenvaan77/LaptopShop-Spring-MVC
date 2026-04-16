@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,26 +24,36 @@ import com.basis.anhangda37.domain.dto.OrderResponseDto;
 import com.basis.anhangda37.domain.dto.payment.PaymentResponseDto;
 import com.basis.anhangda37.domain.enums.OrderStatus;
 import com.basis.anhangda37.domain.enums.PaymentStatus;
+import com.basis.anhangda37.exception.OrderNotFoundException;
+import com.basis.anhangda37.exception.UserNotFoundException;
 import com.basis.anhangda37.repository.CartDetailRepository;
 import com.basis.anhangda37.repository.CartRepository;
 import com.basis.anhangda37.repository.OrderRepository;
 import com.basis.anhangda37.repository.PaymentRepository;
 import com.basis.anhangda37.repository.ProductRepository;
 import com.basis.anhangda37.repository.UserRepository;
+import com.basis.anhangda37.util.AppConstants;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
+/**
+ * Service class for Order-related operations.
+ * Handles order management, payment processing, and checkout operations.
+ * Provides comprehensive logging and error handling.
+ */
 @Service
 public class OrderService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
     private final OrderRepository orderRepository;
     private final CartDetailRepository cartDetailRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final PaymentRepository paymentRepository;
-
     private final VnPayService vnPayService;
 
     public OrderService(OrderRepository orderRepository, CartDetailRepository cartDetailRepository,
@@ -111,38 +123,95 @@ public class OrderService {
         return orderRepository.findByPayment(payment).get();
     }
 
+    /**
+     * Retrieves an order by ID.
+     * @param id The order ID
+     * @return The order if found
+     * @throws OrderNotFoundException if the order doesn't exist
+     */
+    public Order getOrderById(Long id) {
+        logger.debug("Fetching order with id: {}", id);
+        return orderRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Order not found with id: {}", id);
+                    return new OrderNotFoundException(id);
+                });
+    }
+
+    /**
+     * Retrieves all orders for a specific user.
+     * @param user The user
+     * @return A list of user orders
+     */
     public List<Order> getAllOrdersByUser(User user) {
+        logger.debug("Fetching all orders for user: {}", user.getEmail());
         return orderRepository.findByUser(user);
     }
 
+    /**
+     * Retrieves all orders for a user sorted by creation date (descending).
+     * @param user The user
+     * @return A list of user orders sorted by creation date
+     */
     public List<Order> getAllOrdersByUserOrderByCreatedAtDesc(User user) {
+        logger.debug("Fetching user orders sorted by date (descending): {}", user.getEmail());
         return orderRepository.findByUserOrderByCreatedAtDesc(user);
     }
 
+    /**
+     * Retrieves all orders.
+     * @return A list of all orders
+     */
     public List<Order> getAllOrders() {
+        logger.debug("Fetching all orders");
         return orderRepository.findAll();
     }
 
+    /**
+     * Retrieves all orders with pagination.
+     * @param pageable The pagination information
+     * @return A page of orders
+     */
     public Page<Order> getAllOrders(Pageable pageable) {
+        logger.debug("Fetching orders with pagination: page={}, size={}", 
+                pageable.getPageNumber(), pageable.getPageSize());
         return orderRepository.findAll(pageable);
     }
 
-    public Order getOrderById(Long id) {
-        return orderRepository.findById(id).get();
-    }
-
+    /**
+     * Updates the status of an order.
+     * @param order The order to update
+     * @param orderStatus The new status
+     * @return The updated order
+     */
     public Order updateStatus(Order order, OrderStatus orderStatus) {
+        logger.info("Updating order {} status to: {}", order.getId(), orderStatus);
         order.setStatus(orderStatus);
-        return order = orderRepository.save(order);
+        Order updatedOrder = orderRepository.save(order);
+        logger.debug("Order status updated successfully");
+        return updatedOrder;
     }
 
+    /**
+     * Deletes an order by ID.
+     * @param id The order ID
+     */
     public void deleteById(Long id) {
-        if (orderRepository.existsById(id)) {
-            orderRepository.deleteById(id);
+        logger.info("Deleting order with id: {}", id);
+        if (!orderRepository.existsById(id)) {
+            logger.warn("Attempted to delete non-existent order with id: {}", id);
+            throw new OrderNotFoundException(id);
         }
+        orderRepository.deleteById(id);
+        logger.debug("Order deleted successfully");
     }
 
-    public long countOrder() {
+    /**
+     * Returns the total count of orders.
+     * @return The order count
+     */
+    public long countOrders() {
+        logger.debug("Counting total orders");
         return orderRepository.count();
     }
 

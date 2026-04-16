@@ -87,7 +87,8 @@ public class UserDashboardController {
         user.setAvatar((avatarString == null || avatarString.isBlank()) ? null : avatarString);
         String hashPassword = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassword);
-        user.setRole(userService.getRoleByName(user.getRole().getName()));
+        Role role = roleService.findByName(user.getRole().getName());
+        user.setRole(role);
         userService.saveUser(user);
         return "redirect:/admin/user";
     }
@@ -131,7 +132,7 @@ public class UserDashboardController {
 
     @PostMapping(value = "/admin/user/delete")
     public String deleteUser(Model model, @ModelAttribute("user") User user) {
-        userService.deleteUser(user.getId());
+        userService.deleteUserById(user.getId());
         return "redirect:/admin/user";
     }
 
